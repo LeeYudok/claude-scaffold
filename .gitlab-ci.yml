@@ -1,0 +1,16 @@
+stages:
+  - test
+
+# Runs on the self-hosted shell runner (tag: pig) — no container image.
+# Requirements on the runner host: git, python3, bats (user-local install at ~/.local/bin).
+tests:
+  stage: test
+  tags:
+    - pig
+  before_script:
+    - export PATH="$HOME/.local/bin:$PATH"
+    - bats --version
+    - python3 --version
+  script:
+    - python3 -m unittest discover -s tests -p 'test_*.py' -v
+    - bats tests/claude-scaffold.bats
