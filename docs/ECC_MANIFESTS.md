@@ -1,7 +1,7 @@
 # ECC manifests 구조 분석 — 프리셋 확장 시 참고
 
 > 출처: ECC(everything-claude-code) `manifests/` (2026-07-09 스냅샷, 사내 미러 경유).
-> claude-scaffold 프리셋(현 9종 스택 + forge 2종)이 더 늘어나 "스택 = 프리셋 1개" 평면 구조가
+> claude-scaffold 프리셋(현 10종 스택 + forge 2종)이 더 늘어나 "스택 = 프리셋 1개" 평면 구조가
 > 버거워질 때 참고할 선택 설치 설계. **지금 당장 도입하는 것 아님** — 임계점은 아래 "도입 판단" 참조.
 
 ## 3계층 모델
