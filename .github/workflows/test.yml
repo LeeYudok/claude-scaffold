@@ -1,0 +1,21 @@
+name: tests
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+
+jobs:
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install bats-core
+        run: sudo apt-get update -y && sudo apt-get install -y bats
+
+      - name: Run python unit tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Run claude-scaffold.sh bats tests
+        run: bats tests/claude-scaffold.bats

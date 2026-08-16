@@ -1,0 +1,43 @@
+name: Claude Code Review
+
+# PR 자동 리뷰. 공개레포이므로 pull_request 트리거를 쓴다 —
+# GitHub은 fork PR 실행에서 시크릿(ANTHROPIC_API_KEY)을 withhold 하므로 키가 유출되지 않는다.
+# 아래 if 가드로 동일 레포발 PR(브랜치 PR)에서만 리뷰를 돌려, fork PR 은 조용히 건너뛴다.
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            이 PR 을 이 저장소의 리뷰 컨벤션에 맞춰 리뷰한다.
+            - code-reviewer 에이전트로 버그·품질·유지보수성 리뷰
+            - security-audit 에이전트로 시크릿 노출·인증 누락 등 보안 점검
+            - .claude/rules/ 의 우선순위 티어를 기준으로 P0(즉시 중단)/P1(PR 차단)/P2(권장)로
+              분류하고, P0·P1 위반을 최우선으로 지적한다
+            - AGENTS.md/CLAUDE.md 의 규약(이슈 연결, 테스트 동반, 브랜치 전략 등) 준수 여부 확인
+
+            리뷰 결과는 PR 코멘트로 남긴다.
+            Repository: ${{ github.repository }}
+            PR: #${{ github.event.pull_request.number }}
+          claude_args: |
+            --max-turns 8
+            --model claude-sonnet-5
+          track_progress: true
+          use_sticky_comment: true

@@ -1,0 +1,6 @@
+# 개인 메모리(팀 비공유) — 컨벤션상 user_*.md 만 제외
+memory/user_*.md
+# instinct-lite 세션 관찰 로그 — 비커밋
+memory/observations/
+# python bytecode from scripts/
+scripts/__pycache__/

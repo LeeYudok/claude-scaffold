@@ -1,0 +1,20 @@
+# 개인 세션/작업 노트 — 커밋 금지
+lastworks.resume
+*.resume
+
+# OS/에디터 잡파일
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# python bytecode
+__pycache__/
+*.pyc
+
+# CodeGraph 로컬 인덱스 (#35)
+.codegraph/
+
+# 시크릿(#40) — pre-commit 훅과 이중 방어
+.env
+.env.*

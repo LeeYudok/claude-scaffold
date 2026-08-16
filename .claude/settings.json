@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/pre-commit.sh",
+            "if": "Bash(git commit*)",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/post-edit-format.sh",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/post-test-notify.sh",
+            "if": "Bash(*test*)",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/observe-lite.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "컨텍스트 압축이 시작됩니다. 압축 전, 진행 중인 작업에서 재진입에 필요한 사실(완료/진행/다음 단계, 주요 결정과 근거, 차단 요소, 관련 이슈·브랜치·파일)을 정리해 보존하십시오.\n\n- 세션 간 지속이 필요한 비자명 사실은 `.claude/memory/` 에 타입접두(project_/feedback_/reference_) 메모리로 기록하고 `MEMORY.md` 인덱스에 한 줄 추가.\n- 코드/git 으로 드러나는 사실은 기록하지 말 것(중복).",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-memory-remind.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

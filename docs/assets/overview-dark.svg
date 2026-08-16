@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="330" viewBox="0 0 880 330" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
+  <style>
+    .box{fill:#161b22;stroke:#30363d;stroke-width:1.5;rx:10}
+    .accent{fill:#0c2d6b;stroke:#388bfd;stroke-width:1.5}
+    .gate{fill:#341a00;stroke:#d29922;stroke-width:1.5}
+    .h{font-size:15px;font-weight:700;fill:#e6edf3}
+    .t{font-size:12.5px;fill:#c9d1d9}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;fill:#79c0ff}
+    .arrow{stroke:#6e7681;stroke-width:2;fill:none;marker-end:url(#a)}
+    .cap{font-size:11.5px;fill:#8b949e}
+    .block{font-size:12.5px;font-weight:700;fill:#ff7b72}
+    .pass{font-size:12.5px;font-weight:700;fill:#3fb950}
+  </style>
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L8,4.5 L0,9 z" fill="#6e7681"/>
+    </marker>
+  </defs>
+
+  <!-- 1. one command -->
+  <rect class="box accent" x="20" y="110" width="215" height="96" rx="10"/>
+  <text class="h" x="36" y="140">One command</text>
+  <text class="mono" x="36" y="164">claude-scaffold.sh</text>
+  <text class="mono" x="36" y="182">--stack nextjs,go ...</text>
+  <text class="cap" x="36" y="199">curl | bash, no framework</text>
+
+  <path class="arrow" d="M235,158 H285"/>
+
+  <!-- 2. what you get -->
+  <rect class="box" x="290" y="34" width="290" height="252" rx="10"/>
+  <text class="h" x="308" y="62">.claude/ you own</text>
+  <text class="t" x="308" y="90"><tspan class="mono">agents/</tspan>   reviewer, auditor, SDLC trio</text>
+  <text class="t" x="308" y="112"><tspan class="mono">skills/</tspan>   review, grill-me, search-first</text>
+  <text class="t" x="308" y="134"><tspan class="mono">commands/</tspan> /fix-issue, /sdlc-cycle</text>
+  <text class="t" x="308" y="156"><tspan class="mono">rules/</tspan>    P0 / P1 / P2, paths-scoped</text>
+  <text class="t" x="308" y="178"><tspan class="mono">hooks/</tspan>    composed pre-commit gate</text>
+  <text class="t" x="308" y="200"><tspan class="mono">memory/</tspan>   project memory (SSOT)</text>
+  <text class="t" x="308" y="222"><tspan class="mono">AGENTS.md</tspan> the project brain</text>
+  <text class="cap" x="308" y="262">Plain files, committed to your repo —</text>
+  <text class="cap" x="308" y="278">fork-and-fill, no lock-in.</text>
+
+  <path class="arrow" d="M580,158 H630"/>
+
+  <!-- 3. enforced -->
+  <rect class="box gate" x="635" y="66" width="225" height="188" rx="10"/>
+  <text class="h" x="653" y="94">Enforced, not advised</text>
+  <text class="t" x="653" y="122">git commit passes the gate:</text>
+  <text class="block" x="653" y="146">blocked: staged .env</text>
+  <text class="block" x="653" y="166">blocked: broken build</text>
+  <text class="block" x="653" y="186">blocked: failing lint</text>
+  <text class="pass" x="653" y="210">passed: ship it</text>
+  <text class="cap" x="653" y="238">Works even when the AI forgets.</text>
+</svg>
