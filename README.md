@@ -137,6 +137,7 @@ bin/                    claude-scaffold.sh 부트스트랩 스크립트
 | `go` | go.md (paths: **/*.go) | `go build ./...` + `vet` + `golangci-lint` |
 | `rust` | rust.md (paths: src/**/*.rs, **/*.rs) | `cargo check` + `clippy` |
 | `android` | android.md (paths: **/*.kt) | `./gradlew ktlintCheck detekt` |
+| `flutter` | flutter.md (paths: **/*.dart, pubspec.yaml) | `dart format` + `flutter analyze` + `test` |
 | `ops` | ops.md (paths: Dockerfile, docker-compose*, quadlet/**, ansible/**) | — |
 
 ## Forge 프리셋 (`--forge`)
