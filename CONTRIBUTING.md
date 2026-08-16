@@ -1,36 +1,38 @@
 # Contributing to claude-scaffold
 
-claude-scaffold is a minimal `.claude/` bootstrap template, not a running
-application — most contributions are Markdown (rules, agent/skill
-definitions) and small shell scripts (hooks, `bin/claude-scaffold.sh`,
-`presets/*/.claude/hooks/pre-commit.partial.sh`). The same workflow discipline
-still applies: issue first, scoped branch, one focused commit set, review.
+Thanks for considering a contribution! claude-scaffold is a minimal `.claude/`
+bootstrap template, not a running application — most contributions are Markdown
+(rules, agent/skill definitions) and small shell scripts (hooks,
+`bin/claude-scaffold.sh`, `presets/*/.claude/hooks/pre-commit.partial.sh`).
+The easiest way to make a first contribution is a **new stack preset** — see
+the section below and the issues labeled
+[`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
-## Workflow
+## Workflow (GitHub)
 
-1. **Issue first.** File a GitLab issue before starting work, except for
-   trivial typo fixes. Note the issue number — it must appear in the branch
-   name, every commit, and the merge request.
-2. **Branch naming**: `type/issue-<N>-<slug>`, where `type` is one of
+1. **Issue first.** Open a GitHub issue before starting work, except for
+   trivial typo fixes. Note the issue number — it should appear in the branch
+   name, commits, and the pull request.
+2. **Fork & branch**: `type/issue-<N>-<slug>`, where `type` is one of
    `feat`, `fix`, `chore`, `docs`. Example: `docs/issue-14-contributing-spec`.
-   Never commit directly to `main` or `develop`.
-3. **Commit messages** must include the issue number, e.g.
-   `docs: add preset spec (#14)`. Keep unrelated changes in separate commits
-   even within the same branch/MR.
-4. **Pre-commit gate.** `.claude/hooks/pre-commit.sh` runs on every commit in
-   consuming repos (this template repo itself has no stack applied, so the
-   gate is effectively the secret-leak check only). If you're testing a
-   preset's `pre-commit.partial.sh`, verify it against a real bootstrapped
-   repo — see [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md).
-5. **Merge request.** Open an MR against `main` with `Closes #<N>` in the
-   description. GitLab 19 auto-closes the issue on merge via `Closes #N`
-   (verified 2026-08-03) — still check `glab issue view <N>` after merging,
-   and only if it remains `opened`, add a note and close it manually
-   (`glab issue note` + `glab issue close`, or the GitLab web UI equivalent).
-6. **Review.** At minimum, a second pair of eyes on any change to
-   `bin/claude-scaffold.sh`, `.claude/hooks/pre-commit.sh`, or any
-   `pre-commit.partial.sh` — these are load-bearing for every repo that
-   bootstraps from this template.
+3. **Commit messages** include the issue number, e.g.
+   `docs: add preset spec (#14)`. Keep unrelated changes in separate commits.
+4. **Run the tests locally** before opening a PR:
+
+   ```bash
+   # bats (bootstrap script + presets); install: https://bats-core.readthedocs.io
+   bats tests/claude-scaffold.bats
+
+   # python unit tests (hook/link-checker helpers)
+   python3 -m unittest discover -s tests
+   ```
+
+   The same suite runs in CI on every PR — a green run is required to merge.
+5. **Pull request** against `main` with `Closes #<N>` in the description.
+   Merging auto-closes the issue.
+6. **Review.** Changes to `bin/claude-scaffold.sh`, `.claude/hooks/pre-commit.sh`,
+   or any `pre-commit.partial.sh` get extra scrutiny — these are load-bearing
+   for every repo that bootstraps from this template.
 
 ## What to change where
 
@@ -41,10 +43,13 @@ still applies: issue first, scoped branch, one focused commit set, review.
 - **Stack presets** (`presets/<stack>/`): opt-in, applied only when a repo
   selects that stack via `bin/claude-scaffold.sh --stack <name>`. See
   [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) for the required layout.
+- **English overlay** (`presets/lang-en/`): the English mirror of the Korean
+  originals. If you change a Korean rule/agent/skill, mirror the change in
+  `presets/lang-en/` in the same PR (and vice versa). Executable scripts are
+  written in English once and shared — do not duplicate them into the overlay.
 - **Bootstrap script** (`bin/claude-scaffold.sh`): the only piece of logic that
   copies files, applies presets, and substitutes placeholders. Changes here
-  affect every mode of consumption (script, GitLab import, in-place
-  self-clean) — test all three before proposing a change.
+  affect every mode of consumption — test them with the bats suite.
 
 ## Contributing a new stack preset
 
@@ -52,16 +57,16 @@ still applies: issue first, scoped branch, one focused commit set, review.
    required directory layout, `paths:` frontmatter rules, and the
    `pre-commit.partial.sh` contract (in particular: **never call `exit 0`**
    inside a partial — see the "Why partials must not `exit 0`" section, which
-   documents a real regression from issue #6).
+   documents a real regression).
 2. Create `presets/<stack>/.claude/rules/<stack>.md` and, if the stack has an
    automatable build/lint/test step, `presets/<stack>/.claude/hooks/pre-commit.partial.sh`.
    A preset without a meaningful automated gate (e.g. `ops`) may omit the
    partial entirely.
-3. Add a row to the stack preset table in `README.md` and `README.en.md`
+3. Add the English rule file at `presets/lang-en/stacks/<stack>/.claude/rules/<stack>.md`.
+4. Add a row to the stack preset table in `README.md` and `README.en.md`
    (rule file + pre-commit gate description).
-4. Bootstrap a scratch repo with `bin/claude-scaffold.sh /tmp/scratch --stack
-   <your-stack> --name scratch` (or the repo's designated scratchpad
-   directory) and confirm:
+5. Bootstrap a scratch repo with `bin/claude-scaffold.sh /tmp/scratch --stack
+   <your-stack> --name scratch` and confirm:
    - the rule file lands at `.claude/rules/<stack>.md` with correct
      frontmatter `paths:`,
    - the partial is appended into `.claude/hooks/pre-commit.sh` after the
@@ -69,14 +74,16 @@ still applies: issue first, scoped branch, one focused commit set, review.
    - a deliberate build/lint failure in the scratch repo makes
      `git commit` exit non-zero, and a passing build commits cleanly,
    - combining your new stack with at least one existing stack still runs
-     both gates (regression check for the issue #6 class of bug).
-5. Open an issue, then a branch/MR per the workflow above.
+     both gates.
+6. Open an issue, then a branch/PR per the workflow above.
 
 ## Style
 
 - Documentation is written in standard, professional Korean (`README.md` and
   the Korean originals) or English (`README.en.md` and `presets/lang-en/`) —
   no emoji as icons or decoration, per this project's visual conventions.
+  Contributing in English only is fine — maintainers will help with the
+  Korean side if you can't.
 - Shell scripts: `set -euo pipefail` at the top, POSIX-compatible where
   practical since presets run under whatever shell the consuming repo's CI
   provides.
