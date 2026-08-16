@@ -12,7 +12,9 @@ on:
 
 jobs:
   claude-response:
+    # vars.CLAUDE_REVIEW_ENABLED 미설정 레포(시크릿 없음)에서는 실행하지 않는다
     if: |
+      vars.CLAUDE_REVIEW_ENABLED == 'true' &&
       contains(github.event.comment.body, '@claude') &&
       (github.event.comment.author_association == 'OWNER' ||
        github.event.comment.author_association == 'MEMBER' ||
