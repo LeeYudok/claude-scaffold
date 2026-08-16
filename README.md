@@ -1,6 +1,6 @@
 # claude-scaffold
 
-한국어 | [English](README.en.md)
+한국어 | [English](README.en.md) | [简体中文](README.zh.md) | [日本語](README.ja.md)
 
 [![tests](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

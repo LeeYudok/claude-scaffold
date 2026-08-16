@@ -9,7 +9,8 @@ on:
 
 jobs:
   claude-review:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # 같은 레포 PR + API 키 시크릿이 설정된 경우에만 — 포크 PR 과 시크릿 미설정 레포에서 실패 방지
+    if: github.event.pull_request.head.repo.full_name == github.repository && vars.CLAUDE_REVIEW_ENABLED == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
