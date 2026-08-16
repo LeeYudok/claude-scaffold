@@ -240,6 +240,7 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 ## Contributing
 
 워크플로는 [CONTRIBUTING.md](CONTRIBUTING.md), 스택 프리셋 규격은 [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) 참조.
+처음이라면 [`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 라벨부터 — 새 스택 프리셋 추가가 구조가 정형화돼 있어 가장 만만하다.
 
 ## License
 

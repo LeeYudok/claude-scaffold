@@ -258,6 +258,8 @@ see **[docs/GITLAB_TEMPLATE.md](docs/GITLAB_TEMPLATE.md)**.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
 [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) for the stack preset format.
+New here? Start with a [`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) —
+adding a new stack preset is the most approachable one, since the layout is fully templated.
 
 ## License
 
