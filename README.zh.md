@@ -87,7 +87,7 @@ prompt 编写也没关系：
     sdlc-tester.md        AC/TC 测试编写 agent
     sdlc-verifier.md      流水线执行 + 报告 agent
     agent-evolve.md       自我改进元 agent —— 根据运行反馈打磨 agents/*.md
-  commands/
+  commands/              （在 Claude Code 上属遗留 — 斜杠命令已并入 skills）
     sonar.md             SonarQube 分析（CE 任务轮询、sqp_/squ_ 令牌处理）
     sdlc-cycle.md         5 阶段 SDLC 自动化
     knowledge-graph.md    重新生成 .claude 知识图谱 + 断链检查
@@ -112,14 +112,14 @@ prompt 编写也没关系：
     review/                   code-reviewer + security-audit 封装
     memory-factcheck/         记忆事实核查 —— 对照代码/DB/issue 验证并修正过期内容
     security-precheck/        审计前安全排查 → 拆分 issue → 并行修复
-  workflows/
+  workflows/             （不会自动加载 — 需显式调用）
     rules-audit.js           存储式 Workflow 示例 —— 扫描/验证/修复，合并由人工把关
-  scripts/
+  scripts/               （不会自动加载 — 需显式调用）
     knowledge_graph.py       .claude 生态图谱 + --check 断链门禁
   settings.json               钩子接线 + 默认 deny 规则
 AGENTS.md                 项目大脑 —— 规则 SSOT（P0/P1/P2 + 工作流）
-CLAUDE.md                 指向 @AGENTS.md 的指针（Claude Code）
-GEMINI.md                 指向 @AGENTS.md 的指针（Gemini CLI）
+CLAUDE.md                 @AGENTS.md + 记忆索引 import（Claude Code）
+GEMINI.md                 @AGENTS.md + 记忆索引 import（Gemini CLI）
 presets/                  预设片段（复制覆盖模型）
   forge-github/           GitHub forge —— gh、PR、`Closes #N` 自动关闭
   forge-gitlab/           GitLab forge —— glab、MR、`Closes #N` 自动关闭（合并后需确认）
@@ -176,7 +176,22 @@ git 钩子**与 harness 无关，始终接入**（#21）。Claude Code 的 `PreT
 
 所选技术栈的 P0 会**直接插入 `AGENTS.md` 正文**，不依赖 `.claude/rules/` 引用链接，因此在不加载 `.claude/` 的 harness 上同样可达。未选择的技术栈不会被插入（Codex 指令合计默认上限为 32KiB — 以避免 context flooding）。
 
-**实测验证（2026-08）**：Codex（codex-cli 0.149.0）会自动加载 `codex` 模式产物中的 AGENTS.md，正确回答了规则分级，并**依据 P0 规则主动拒绝了提交 `.env` 的指令**（第一道防线）。即使模型执意尝试，git 钩子也会以 exit 2 拦截（第二道防线，已有测试覆盖）。Antigravity（agy 1.1.17）虽在文档中声明支持 `AGENTS.md`/`.agents/rules/`，但**实测其 headless（`-p`）模式不加载规则** — 交互模式未验证，因此不保证对 Antigravity 的支持。
+### 实测验证（2026-08-22）
+
+| Harness | 实测版本 | baseline | full 层已确认 / 未确认的内容 |
+|---|---|---|---|
+| Claude Code | 2.1.239 | 成立 | `.claude/rules/*.md` 的 `paths:` 条件加载、子代理、skills、`settings.json` 钩子 — 均已对照[官方文档](https://code.claude.com/docs/en/memory.md)确认 |
+| Codex | codex-cli 0.149.0 | 成立 | 已实测 `AGENTS.md` 自动加载与依据 P0 拒绝 `.env`。**skills 不会被发现**（见下） |
+| Antigravity | agy **1.1.18**（未重测） | 成立 | 1.1.17 上实测 **headless（`-p`）不加载规则** — 原因未查明。1.1.18 与交互模式均未重测 |
+
+Codex（codex-cli 0.149.0）会自动加载 `codex` 模式产物中的 AGENTS.md，正确回答了规则分级，并**依据 P0 规则主动拒绝了提交 `.env` 的指令**（第一道防线）。即使模型执意尝试，git 钩子也会以 exit 2 拦截（第二道防线，已有测试覆盖）。
+
+**已知缺口 — Codex 的 skills 不会被自动发现。** Codex 发现仓库 skills 的路径是 `.agents/skills`，而当前 `--harness codex` 仍将其留在 `.claude/skills`。规则层（`AGENTS.md`）可用，skills 层不可用 — 这属于 baseline 而非 full。
+
+另有两项 Codex 约束影响设计：
+
+- **指令合计默认上限 32KiB**（`project_doc_max_bytes`），因此只把所选技术栈的 P0 内联进 `AGENTS.md`（`--stack javaweb` 实测 6,869 B — 占上限的 21%）。
+- **`.codex/` 层仅在项目受信任时加载。** 生成文件并不等于生效，因此决定性的强制线放在 `.git/hooks` + CI。
 
 ## 语言（`--lang`）
 
