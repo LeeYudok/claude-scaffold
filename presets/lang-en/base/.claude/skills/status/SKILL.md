@@ -49,6 +49,14 @@ command -v glab >/dev/null && glab issue list --state=opened -P 1 --per-page 5 2
 command -v pm2 >/dev/null && pm2 list 2>/dev/null | head -20 || true
 ```
 
+### 6. Today's usage (optional — only when `ccusage` is present)
+```bash
+# ccusage reports Claude Code usage. If it isn't installed, skip silently
+# (it does not apply to other harnesses such as Codex or agy).
+command -v ccusage >/dev/null && ccusage daily --since "$(date +%Y%m%d)" --json 2>/dev/null \
+  | python3 -c "import json,sys; d=json.load(sys.stdin).get('daily') or [{}]; r=d[0]; print(f\"today {r.get('totalTokens',0):,} tokens / \${r.get('totalCost',0):.2f}\")" 2>/dev/null || true
+```
+
 ## Output format
 
 ```
@@ -66,6 +74,9 @@ Build: ✅ succeeded / ❌ failed
 ### Issues (open)
 #42 [feature] ...
 #38 [bug] ...
+
+### Usage (only when ccusage is present)
+today 1,207,480,323 tokens / $1227.00
 
 ### Next steps
 - (remaining TODO comments or outstanding work on the current branch)

@@ -49,6 +49,14 @@ command -v glab >/dev/null && glab issue list --state=opened -P 1 --per-page 5 2
 command -v pm2 >/dev/null && pm2 list 2>/dev/null | head -20 || true
 ```
 
+### 6. 오늘 사용량 (옵션 — `ccusage` 가 있을 때만)
+```bash
+# ccusage 는 Claude Code 전용 사용량 도구다. 설치돼 있지 않으면 조용히 건너뛴다
+# (Codex·agy 등 다른 하네스에서는 해당 없음).
+command -v ccusage >/dev/null && ccusage daily --since "$(date +%Y%m%d)" --json 2>/dev/null \
+  | python3 -c "import json,sys; d=json.load(sys.stdin).get('daily') or [{}]; r=d[0]; print(f\"오늘 {r.get('totalTokens',0):,} 토큰 / \${r.get('totalCost',0):.2f}\")" 2>/dev/null || true
+```
+
 ## 출력 형식
 
 ```
@@ -66,6 +74,9 @@ TypeScript: ✅ 에러 없음 / ❌ N개 에러
 ### 이슈 (오픈)
 #42 [feature] ...
 #38 [bug] ...
+
+### 사용량 (ccusage 있을 때만)
+오늘 1,207,480,323 토큰 / $1227.00
 
 ### 다음 할 일
 - (현재 브랜치 기준 TODO 코멘트나 남은 작업)
