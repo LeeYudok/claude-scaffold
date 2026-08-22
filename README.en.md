@@ -158,6 +158,16 @@ Injected files: `.claude/rules/forge.md` (always loaded) plus forge variants of
 `.claude/commands/fix-issue.md` and `sdlc-cycle.md` (overwrite the base). Base
 files stay forge-neutral ("issue / PR·MR").
 
+## Harness (`--harness`)
+
+| Value | Target | What it does |
+|---|---|---|
+| `claude` (default) | Claude Code | Full install — settings.json hook bindings, subagents, slash commands, workflows |
+| `codex` | Codex and other AGENTS.md harnesses | Installs only the harness-neutral layers (AGENTS.md, rules, skills, hooks, memory), drops the Claude-only layers, and wires the pre-commit gate as a **real `.git/hooks/pre-commit`** |
+| `all` | Mixed teams | Full install + the git hook (Claude Code enforces via PreToolUse; every other harness hits the same gate through the git hook) |
+
+Codex reads `AGENTS.md` natively, so the rules layer works as-is. An existing `.git/hooks/pre-commit` is never overwritten — you get a warning instead.
+
 ## Language (`--lang`)
 
 The base tree (agents, rules, skills, commands, `AGENTS.md`, hook/settings

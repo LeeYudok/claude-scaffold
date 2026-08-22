@@ -17,6 +17,12 @@ Usage:
                  en overlays presets/lang-en/ (base + forge + selected stacks) on top of the
                  English base, after base copy + forge merge + stack merge.
   --name         {{PROJECT_NAME}} substitution value. Default = target directory name.
+  --harness      Target agent harness: claude (default), codex, or all.
+                 codex keeps AGENTS.md + rules/skills/hooks/memory (harness-neutral),
+                 drops Claude Code-only layers (settings.json, agents/, commands/,
+                 workflows/, CLAUDE.md/GEMINI.md pointers), and wires the pre-commit
+                 gate as a real .git/hooks/pre-commit. all installs everything and
+                 also wires the git hook.
   --yes          Skip interactive prompts (non-interactive mode).
   --update       Refresh the base .claude/·AGENTS.md etc. of an already-bootstrapped project.
                  .claude/hooks/pre-commit.sh has stack partials inserted, so it is skipped
@@ -50,6 +56,7 @@ LANG_OPT=""
 NAME=""
 ASSUME_YES=0
 UPDATE=0
+HARNESS="claude"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -57,6 +64,7 @@ while [ $# -gt 0 ]; do
     --forge) FORGE="$2"; shift 2 ;;
     --lang)  LANG_OPT="$2"; shift 2 ;;
     --name)  NAME="$2";  shift 2 ;;
+    --harness) HARNESS="$2"; shift 2 ;;
     --yes)   ASSUME_YES=1; shift ;;
     --update) UPDATE=1; shift ;;
     -h|--help) print_help; exit 0 ;;
@@ -67,6 +75,11 @@ done
 
 TARGET="$(cd "$TARGET" && pwd)"
 [ -z "$NAME" ] && NAME="$(basename "$TARGET")"
+
+case "$HARNESS" in
+  claude|codex|all) ;;
+  *) echo "Unknown --harness '$HARNESS' (claude|codex|all)" >&2; exit 1 ;;
+esac
 
 # --- 이슈 #10: SRC 결정. 로컬 clone 이면 BASH_SOURCE 기준, curl 파이프 등으로
 #     로컬 템플릿이 없으면 tarball 을 받아 임시 디렉터리를 SRC 로 쓴다.
@@ -375,6 +388,32 @@ done
 
 # 4) 실행권한
 chmod +x "$TARGET/.claude/hooks/"*.sh 2>/dev/null || true
+
+# 4.5) 하네스 조정 (#16)
+#   codex: Claude Code 전용 계층 제거 — AGENTS.md 는 Codex 가 네이티브로 읽고,
+#          rules/skills/hooks/memory 는 하네스 중립 문서·스크립트라 유지한다.
+#   codex|all: pre-commit 게이트를 진짜 git hook 으로도 배선 — Claude Code 의
+#          PreToolUse 바인딩(settings.json)이 없는 하네스에서도 강제가 성립.
+if [ "$HARNESS" = "codex" ]; then
+  echo "== harness=codex: removing Claude Code-only layers ==" >&2
+  rm -rf "$TARGET/.claude/agents" "$TARGET/.claude/commands" "$TARGET/.claude/workflows"
+  rm -f "$TARGET/.claude/settings.json" "$TARGET/CLAUDE.md" "$TARGET/GEMINI.md"
+fi
+if [ "$HARNESS" = "codex" ] || [ "$HARNESS" = "all" ]; then
+  if [ -d "$TARGET/.git" ]; then
+    githook="$TARGET/.git/hooks/pre-commit"
+    if [ -e "$githook" ]; then
+      echo "Warning: .git/hooks/pre-commit already exists — not overwriting. Chain .claude/hooks/pre-commit.sh manually." >&2
+    else
+      printf '%s\n' '#!/usr/bin/env bash' 'exec "$(git rev-parse --show-toplevel)/.claude/hooks/pre-commit.sh"' > "$githook"
+      chmod +x "$githook"
+      echo "== git pre-commit hook wired to .claude/hooks/pre-commit.sh ==" >&2
+    fi
+  else
+    echo "Note: target is not a git repo yet — after 'git init', wire the gate with:" >&2
+    echo "  printf '%s\n' '#!/usr/bin/env bash' 'exec \"\$(git rev-parse --show-toplevel)/.claude/hooks/pre-commit.sh\"' > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit" >&2
+  fi
+fi
 
 # 5) in-place self-clean (템플릿 흔적 제거)
 if [ "$INPLACE" -eq 1 ]; then
