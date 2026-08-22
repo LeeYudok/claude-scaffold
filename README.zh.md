@@ -112,6 +112,7 @@ prompt 编写也没关系：
     review/                   code-reviewer + security-audit 封装
     memory-factcheck/         记忆事实核查 —— 对照代码/DB/issue 验证并修正过期内容
     security-precheck/        审计前安全排查 → 拆分 issue → 并行修复
+    docs-sync/                文档现行化 — 逐条主张核对 + 多语言配对文件同步
   workflows/             （不会自动加载 — 需显式调用）
     rules-audit.js           存储式 Workflow 示例 —— 扫描/验证/修复，合并由人工把关
   scripts/               （不会自动加载 — 需显式调用）

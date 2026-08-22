@@ -17,6 +17,7 @@ skills/
 
 동봉: `example-skill/`, `review/`, `status/`, `search-first/`, `skill-evolve/`,
 `memory-factcheck/`(메모리 사실 검증), `security-precheck/`(감사 대비 보안 사전점검),
+`docs-sync/`(문서 현행화 — 주장별 사실 대조 + 다국어 짝 파일 동시 갱신),
 `grill-me/`(적대적 요구사항 심문 — superpowers 식 brainstorming 의 opt-in 대체재,
 작업마다 사용자가 택일).
 신규는 `{{PROJECT_NAME}}-sk-*` prefix 권장.

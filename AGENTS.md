@@ -27,7 +27,7 @@
 | `hooks/` | 강제 게이트 — pre-commit, 자동 포맷, observe-lite, 메모리 리마인드 | [README](.claude/hooks/README.md) |
 | `memory/` | 프로젝트 메모리 SSOT — MEMORY.md 인덱스 + 타입접두 파일 | [README](.claude/memory/README.md) |
 | `rules/` | 맥락 인지 룰 — `paths:` 스코프 조건부 로드 | [README](.claude/rules/README.md) |
-| `skills/` | 상황별 절차 — review, status, search-first, memory-factcheck, security-precheck, grill-me 등 | [README](.claude/skills/README.md) |
+| `skills/` | 상황별 절차 — review, status, search-first, memory-factcheck, security-precheck, docs-sync, grill-me 등 | [README](.claude/skills/README.md) |
 | `workflows/` | 저장형 Workflow 오케스트레이션 스크립트(`*.js`) — rules-audit 예제 | [README](.claude/workflows/README.md) |
 | `scripts/` | 레포 로컬 헬퍼 — knowledge_graph.py(문서 그래프 + 링크 체커) | [README](.claude/scripts/README.md) |
 
