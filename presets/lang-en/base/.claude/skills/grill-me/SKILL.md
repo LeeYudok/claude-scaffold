@@ -57,5 +57,12 @@ jumping to design. Each round digs into the previous round's answers.
 ## When NOT to use
 
 - Trivial fixes, typos, mechanical changes — just do them.
-- The user wants collaborative idea *generation* → `superpowers:brainstorming`.
+- The user wants collaborative idea *generation* → `superpowers:brainstorming` (separate plugin).
+- A large, vaguely specified job that must be turned into a spec and then run and evaluated in a
+  loop → Ouroboros (separate MCP server). State survives a dropped session, but it is the heaviest
+  of the three.
 - Mid-implementation questions — this skill is for before work starts.
+
+This skill **only interrogates**, and it stays inside the conversation — no files, no server state.
+Escalate to the heavier options only when that is not enough. See "Picking a requirements-hardening
+tool" in the README for the comparison.

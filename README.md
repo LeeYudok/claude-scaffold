@@ -46,11 +46,8 @@ agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack 
   깜빡해도 걸리는 강제 게이트.
 - **명령 한 방 시리즈**: `/review`(코드리뷰+보안감사 이중), `/status`,
   `/knowledge-graph`(문서 링크 검사), `/sonar`.
-- **요구사항 다지기는 둘 중 골라서**: 스펙을 다회전으로 압박 검증하는 **`grill-me`**(동봉),
-  아이디어를 함께 발산·수렴하는 **superpowers 의 `brainstorming`**(별도 플러그인,
-  [obra/superpowers](https://github.com/obra/superpowers)). 둘 다 설치돼 있으면 작업
-  성격대로 작업마다 택일하면 된다 — 이미 방향이 선 기능은 grill-me 로 굽고, 백지
-  아이디어는 brainstorming 으로 넓힌다.
+- **요구사항 다지기는 셋 중 골라서**: 동봉된 **`grill-me`** 외에 외부 도구 둘을 상황에
+  맞게 붙일 수 있다 → [요구사항 다지기 도구 고르기](#요구사항-다지기-도구-고르기).
 - **세션이 끝나도 기억**: `.claude/memory/` 에 프로젝트 러닝이 쌓여 다음 세션에 자동
   로드되고 팀과 공유된다.
 - **스스로 진화**: skill-evolve/agent-evolve 가 실패 피드백으로 스킬·에이전트 정의를
@@ -152,6 +149,28 @@ bin/                    agents-scaffold.sh 부트스트랩 스크립트
 | `gitlab` | `glab` | MR | `Closes #N` 자동 클로즈 동작 — 머지 후 확인, `opened` 시만 수동 |
 
 주입 파일: `.claude/rules/forge.md`(항상 로드) + `.claude/commands/fix-issue.md`·`sdlc-cycle.md`(forge 변형으로 덮어씀). 베이스 파일은 forge 중립("이슈/PR·MR").
+
+## 요구사항 다지기 도구 고르기
+
+구현 전에 요구사항을 다지는 수단은 세 가지고, **성격이 서로 다르니 작업마다 골라 쓴다.**
+동봉되는 것은 `grill-me` 하나뿐이고 나머지 둘은 별도 설치다.
+
+| | `grill-me` | superpowers | Ouroboros |
+|---|---|---|---|
+| **범위** | 취조만 | 워크플로 전반 | 취조 → 스펙 → 실행 → 평가 루프 |
+| **상태** | 대화 안에서 끝 | 대화 + 파일 산출물 | MCP 서버가 영속 관리 |
+| **무게** | 가벼움 | 중간 | 무거움 — 질문마다 서브에이전트 fanout |
+| **설치** | **동봉** (`.claude/skills/grill-me/`) | 플러그인 [obra/superpowers](https://github.com/obra/superpowers) | 마켓플레이스 [Q00/ouroboros](https://github.com/Q00/ouroboros) (MCP 서버 동반) |
+
+**고르는 기준**
+
+- 이미 방향이 선 기능의 스펙에 구멍이 있는지 → **`grill-me`**. 설치 없이 바로, 대화 한 판으로 끝난다.
+- 백지 아이디어를 발산·수렴하고 산출물(문서)까지 남겨야 함 → **superpowers 의 `brainstorming`**.
+- 요구사항이 모호한 큰 작업을 **스펙화하고 실행·평가까지 루프로 돌려야 함** → **Ouroboros**.
+  세션이 끊겨도 상태가 남는 대신 토큰 비용이 가장 크다.
+
+무게 순으로 올라가되, **아래에서 위로만 간다** — 가벼운 걸로 충분한 작업에 Ouroboros 를
+쓰면 비용만 커진다. 셋 다 설치돼 있어도 자동 발동은 안 하며, 작업마다 사용자가 택일한다.
 
 ## 하네스 (`--harness`)
 
