@@ -264,4 +264,4 @@ adding a new stack preset is the most approachable one, since the layout is full
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Third-party origins (skills/docs) are listed in [CREDITS.md](CREDITS.md).

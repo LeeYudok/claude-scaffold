@@ -6,6 +6,10 @@ user-invocable: true
 
 # Grill Me — adversarial requirements interrogation
 
+> An original skill inspired by — and designed as an opt-in alternative to — the
+> `brainstorming` skill from [obra/superpowers](https://github.com/obra/superpowers) (MIT);
+> the downstream workflow (plan → TDD → review) follows the superpowers process.
+
 Interrogate the user's idea until the spec stops changing, then hand a hardened spec
 to the normal implementation flow. Explicitly invoking this skill substitutes for
 `superpowers:brainstorming` for the current task; everything downstream
