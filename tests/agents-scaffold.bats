@@ -455,6 +455,24 @@ setup_publish_repo() {
 # PRESET_SPEC.md mandates: a pre-commit.partial.sh must never call `exit 0`
 # (it is spliced mid-hook; exit 0 would skip every later stack's gate — issue #6).
 
+@test "no duplicate scaffold entry point at repo root (#35)" {
+  # PR #22 가 루트에 bin/agents-scaffold.sh 의 축약 재구현을 심었고, 그 스크립트는
+  # .claude/settings.json 을 스텁으로 truncate 해 deny 규칙과 훅 바인딩을 파괴했다.
+  # 진입점은 bin/ 하나뿐이어야 한다.
+  [ ! -e "$REPO_ROOT/agents-scaffold.sh" ]
+  [ ! -e "$REPO_ROOT/hooks/pre-commit.sh" ]
+  [ -x "$REPO_ROOT/bin/agents-scaffold.sh" ]
+}
+
+@test "scaffold never truncates an existing .claude/settings.json (#35)" {
+  t="$BATS_TEST_TMPDIR/keepsettings"
+  mkdir -p "$t/.claude"
+  printf '%s\n' '{"permissions":{"deny":["MYRULE"]},"hooks":{}}' > "$t/.claude/settings.json"
+  run bash "$SCRIPT" "$t" --forge github --name keep --yes
+  [ "$status" -eq 0 ]
+  grep -q 'MYRULE' "$t/.claude/settings.json"
+}
+
 @test "no pre-commit.partial.sh in any preset contains exit 0" {
   local found=0 p
   while IFS= read -r p; do
