@@ -5,14 +5,21 @@
 [![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**这不是一个框架，而是一套极简的、fork 后按需填充的 AI 编码代理引导脚手架**，
-自带**强制执行**的规则分级：P0（立即中止）/ P1（阻断 PR）/ P2（评审提示）。各技术栈预设
-会组合进单一的 pre-commit 门禁。以 Claude Code 为先，Codex 等 AGENTS.md harness
-通过 [`--harness`](#harness--harness) 支持。
+**AI 编码代理不守规则。这个工具不是好言相劝，而是直接拦下提交。**
+
+一条命令，就把 `.claude/` 配置和 pre-commit 门禁装进你的仓库。没有框架、没有运行时、没有要接入的注册中心 — 你得到的是**完全归你所有的普通文件。**
 
 ![演示：一条命令完成引导、生成的 .claude/ 目录树，以及 pre-commit 门禁拦截暂存的 .env](docs/assets/demo.gif)
 
 _30 秒演示：一条命令 → 填充完毕的 `.claude/` → 门禁拦截了一次泄露密钥的提交。可用 `vhs docs/assets/demo.tape` 复现。_
+
+## 如果你遇到过这些，就该用它
+
+- 你在**每个会话里重复讲同样的规则** — 昨天说过的，今天又不认识了。
+- 代理把 `.env` 加进了暂存区，或者带着类型错误就生成了提交。
+- 每个同事的 `CLAUDE.md` 都不一样，**结果取决于是谁的会话。**
+
+只写在文档里的规则，AI 迟早会无视。这个脚手架把规则变成**能拦住提交的门禁**，并把它种进仓库。
 
 ## Quickstart
 
@@ -27,7 +34,20 @@ agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack 
 
 你将得到一个填充完毕的 `.claude/` 目录（agents、skills、hooks、按路径作用域加载的
 规则、memory）、一份作为项目大脑的 `AGENTS.md`，以及一个组合而成的 pre-commit
-门禁——全部是完全归你所有的普通文件。完整选项见 [Usage](#usage-1--脚本)。
+门禁——全部是完全归你所有的普通文件。完整选项见 [Usage](docs/OPTIONS.zh.md#usage-1--脚本)。
+
+## 装好之后会发生什么
+
+当代理（或人）试图提交密钥时，**提交根本不会发生。**
+
+```console
+$ bash agents-scaffold.sh . --stack python --name payments --yes
+$ echo 'DB_PASSWORD=hunter2' > .env
+$ git add -f .env app.py && git commit -m "feat: add config"
+Blocked: a .env-type file is staged. Commit is not allowed.
+```
+
+这与在文档里写一句"不要提交密钥"完全不同。拦下它的是 `.git/hooks/pre-commit`，因此**无论你用哪个 AI 工具，也无论是人在终端手动提交，都一样会被拦住。**
 
 ## 你会得到什么 — 写给新手
 
@@ -48,7 +68,7 @@ prompt 编写也没关系：
 - **一键命令**：`/review`（代码评审 + 安全审计）、`/status`、
   `/knowledge-graph`（文档链接检查器）、`/sonar`。
 - **需求打磨，三种方式任选**：除内置的 **`grill-me`** 外，还可按场景接入两个外部工具 →
-  [挑选需求打磨工具](#挑选需求打磨工具)。
+  [挑选需求打磨工具](docs/OPTIONS.zh.md#挑选需求打磨工具)。
 - **跨会话留存的记忆**：项目经验持续沉淀在 `.claude/memory/` 下，
   下次会话自动加载，并与团队共享。
 - **自我进化**：skill-evolve/agent-evolve 会根据失败反馈重写 skill/agent
@@ -73,238 +93,13 @@ prompt 编写也没关系：
 - **经过测试** —— 引导脚本附带 bats 回归测试套件，知识图谱链接
   检查器为文档把关。
 
-## 内含什么
+## 了解更多
 
-```
-.claude/
-  agents/
-    security-audit.md   12 项 P0/P1 安全 grep 扫描
-    db-migration.md      DDL 安全检查 + 回滚 SQL 生成
-    sdlc-developer.md    最小范围实现 agent（SDLC 角色分离）
-    sdlc-tester.md        AC/TC 测试编写 agent
-    sdlc-verifier.md      流水线执行 + 报告 agent
-    agent-evolve.md       自我改进元 agent —— 根据运行反馈打磨 agents/*.md
-  commands/              （在 Claude Code 上属遗留 — 斜杠命令已并入 skills）
-    sonar.md             SonarQube 分析（CE 任务轮询、sqp_/squ_ 令牌处理）
-    sdlc-cycle.md         5 阶段 SDLC 自动化
-    knowledge-graph.md    重新生成 .claude 知识图谱 + 断链检查
-  hooks/
-    pre-commit.sh         pre-commit 门禁骨架（技术栈片段的接入点）
-    post-edit-format.sh   PostToolUse(Edit|Write) → 自动格式化
-    post-test-notify.sh   PostToolUse(Bash, *test*) → 终端通知
-    stop-memory-remind.sh Stop 钩子 → 每会话一次的记忆提醒
-    cc-check.py            PostToolUse(Bash, git commit) → CC > 15 时告警
-  memory/
-    MEMORY.md              auto-memory 索引（SSOT）
-    README.md               记忆类型/使用规则
-  rules/
-    common.md               P0/P1/P2 优先级分级 + 通用工作流（始终加载）
-    security.md              密钥/认证 P0 + 锁定/管理员初始化规则（按路径作用域）
-    testing.md               每功能一测试、mock 优先的单元测试、用户视角断言
-    data.md                  数据脚本规则 —— 禁止批量暂存、显式指定编码
-    README.md                按路径作用域加载 + 规则编写原则
-  skills/
-    skill-evolve/            自我改进元 skill（"Learned warnings" 模式）
-    status/                   多技术栈状态检查
-    review/                   code-reviewer + security-audit 封装
-    memory-factcheck/         记忆事实核查 —— 对照代码/DB/issue 验证并修正过期内容
-    security-precheck/        审计前安全排查 → 拆分 issue → 并行修复
-    docs-sync/                文档现行化 — 逐条主张核对 + 多语言配对文件同步
-  workflows/             （不会自动加载 — 需显式调用）
-    rules-audit.js           存储式 Workflow 示例 —— 扫描/验证/修复，合并由人工把关
-  scripts/               （不会自动加载 — 需显式调用）
-    knowledge_graph.py       .claude 生态图谱 + --check 断链门禁
-  settings.json               钩子接线 + 默认 deny 规则
-AGENTS.md                 项目大脑 —— 规则 SSOT（P0/P1/P2 + 工作流）
-CLAUDE.md                 @AGENTS.md + 记忆索引 import（Claude Code）
-GEMINI.md                 @AGENTS.md + 记忆索引 import（Gemini CLI）
-presets/                  预设片段（复制覆盖模型）
-  forge-github/           GitHub forge —— gh、PR、`Closes #N` 自动关闭
-  forge-gitlab/           GitLab forge —— glab、MR、`Closes #N` 自动关闭（合并后需确认）
-  nextjs/ bun/ ...        各技术栈片段（规则 + pre-commit.partial.sh）
-  lang-en/                英文覆盖层（base/forge-*/stacks/*）—— 见下文 `--lang`
-bin/                      agents-scaffold.sh 引导脚本
-tests/                    引导脚本的 bats 回归测试套件
-```
-
-## 技术栈预设
-
-| 预设 | 规则文件 | pre-commit 门禁 |
-|--------|-----------|-----------------|
-| `nextjs` | nextjs.md (paths: app/**, components/**) | `tsc --noEmit` |
-| `springboot` | springboot.md (paths: src/main/java/**) | `./gradlew build` |
-| `javaweb` | javaweb.md (paths: src/main/java/**, **/*.jsp) | maven/gradle/ant compile（自动检测） |
-| `bun` | bun.md (paths: **/*.ts) | `bunx tsc --noEmit` |
-| `python` | python.md (paths: **/*.py) | `ruff check` + `mypy` |
-| `go` | go.md (paths: **/*.go) | `go build ./...` + `vet` + `golangci-lint` |
-| `rust` | rust.md (paths: src/**/*.rs, **/*.rs) | `cargo check` + `clippy` |
-| `android` | android.md (paths: **/*.kt) | `./gradlew ktlintCheck detekt` |
-| `flutter` | flutter.md (paths: **/*.dart, pubspec.yaml) | `dart format` + `flutter analyze` + `test` |
-| `ops` | ops.md (paths: Dockerfile, docker-compose*, quadlet/**, ansible/**) | — |
-
-## Forge 预设（`--forge`）
-
-注入与你所用 forge 匹配的 issue/PR 工作流。在技术栈预设之前合并。
-
-| 预设 | CLI | PR/MR | issue 关闭 |
-|--------|-----|-------|-------------|
-| `github`（默认） | `gh` | PR | 合并时通过 `Closes #N` **自动关闭** |
-| `gitlab` | `glab` | MR | `Closes #N` 自动关闭有效 —— 合并后需确认，仍处于 open 时才手动关闭 |
-
-注入的文件：`.claude/rules/forge.md`（始终加载），以及
-`.claude/commands/fix-issue.md` 和 `sdlc-cycle.md` 的 forge 变体（覆盖基础版本）。
-基础文件保持 forge 中立（"issue / PR·MR"）。
-
-## 挑选需求打磨工具
-
-实现之前打磨需求的手段有三种，**性质各不相同，按任务挑选**。内置的只有 `grill-me`，另外两个需单独安装。
-
-| | `grill-me` | superpowers | Ouroboros |
-|---|---|---|---|
-| **范围** | 仅拷问 | 覆盖整个工作流 | 拷问 → 规格 → 执行 → 评估 循环 |
-| **状态** | 止于对话之内 | 对话 + 文件产物 | 由 MCP 服务器持久管理 |
-| **重量** | 轻 | 中 | 重 — 每个问题都会 fanout 子代理 |
-| **安装** | **内置**（`.claude/skills/grill-me/`） | 插件 [obra/superpowers](https://github.com/obra/superpowers) | 市场 [Q00/ouroboros](https://github.com/Q00/ouroboros)（附带 MCP 服务器） |
-
-**选择标准**
-
-- 方向已定的功能，想找出规格中的漏洞 → **`grill-me`**。无需安装，一轮对话即可。
-- 一张白纸需要发散再收敛，并留下文档产物 → **superpowers 的 `brainstorming`**。
-- 需求模糊的大型工作，需要**先规格化，再以循环方式执行与评估** → **Ouroboros**。会话中断后状态仍在，但 token 成本三者中最高。
-
-按重量逐级升级，且**只向上走** — 轻量方案够用的任务上动用 Ouroboros 只会推高成本。三者即便都已安装也不会自动触发，由使用者按任务选定。
-
-## Harness（`--harness`）
-
-| 取值 | 目标 | 行为 |
-|---|---|---|
-| `claude`（默认） | Claude Code | 完整安装 — 含 settings.json 钩子绑定、子代理、斜杠命令、workflows |
-| `codex` | Codex 及其他 AGENTS.md harness | 仅安装与 harness 无关的层（AGENTS.md、rules、skills、hooks、memory），移除 Claude 专用层 |
-| `all` | 混合团队 | 完整安装 |
-
-**保障分为两级（#21）** — 不是"支持/不支持"的二分法。
-
-| 级别 | 成立的内容 | 适用 harness |
-|---|---|---|
-| **baseline** | `AGENTS.md` 正文中的 P0/P1（含所选技术栈的 P0）+ **真正的 `.git/hooks/pre-commit` 门禁** + CI | **全部 harness，与 `--harness` 取值无关。** 无论 harness 读取什么，也无论是否由人在终端直接提交，门禁都会生效 |
-| **full** | baseline + 该 harness 的原生层（子代理、skills、斜杠命令、按路径的条件加载、lifecycle 钩子） | 仅限适配器经过实测验证的 harness |
-
-git 钩子**与 harness 无关，始终接入**（#21）。Claude Code 的 `PreToolUse` 钩子只在该会话通过 Bash 工具提交时触发，因此它属于早期反馈层而非强制线 — 决定性的强制线放在 harness 之外（`.git/hooks` + CI）。已存在的 `.git/hooks/pre-commit` 不会被覆盖，只会给出警告。
-
-所选技术栈的 P0 会**直接插入 `AGENTS.md` 正文**，不依赖 `.claude/rules/` 引用链接，因此在不加载 `.claude/` 的 harness 上同样可达。未选择的技术栈不会被插入（Codex 指令合计默认上限为 32KiB — 以避免 context flooding）。
-
-### 实测验证（2026-08-22）
-
-| Harness | 实测版本 | baseline | full 层已确认 / 未确认的内容 |
-|---|---|---|---|
-| Claude Code | 2.1.239 | 成立 | `.claude/rules/*.md` 的 `paths:` 条件加载、子代理、skills、`settings.json` 钩子 — 均已对照[官方文档](https://code.claude.com/docs/en/memory.md)确认 |
-| Codex | codex-cli 0.149.0 | 成立 | 已实测 `AGENTS.md` 自动加载与依据 P0 拒绝 `.env`。**skills 不会被发现**（见下） |
-| Antigravity | agy **1.1.18**（未重测） | 成立 | 1.1.17 上实测 **headless（`-p`）不加载规则** — 原因未查明。1.1.18 与交互模式均未重测 |
-
-Codex（codex-cli 0.149.0）会自动加载 `codex` 模式产物中的 AGENTS.md，正确回答了规则分级，并**依据 P0 规则主动拒绝了提交 `.env` 的指令**（第一道防线）。即使模型执意尝试，git 钩子也会以 exit 2 拦截（第二道防线，已有测试覆盖）。
-
-**已知缺口 — Codex 的 skills 不会被自动发现。** Codex 发现仓库 skills 的路径是 `.agents/skills`，而当前 `--harness codex` 仍将其留在 `.claude/skills`。规则层（`AGENTS.md`）可用，skills 层不可用 — 这属于 baseline 而非 full。
-
-另有两项 Codex 约束影响设计：
-
-- **指令合计默认上限 32KiB**（`project_doc_max_bytes`），因此只把所选技术栈的 P0 内联进 `AGENTS.md`（`--stack javaweb` 实测 6,869 B — 占上限的 21%）。
-- **`.codex/` 层仅在项目受信任时加载。** 生成文件并不等于生效，因此决定性的强制线放在 `.git/hooks` + CI。
-
-## 语言（`--lang`）
-
-基础目录树（agents、rules、skills、commands、`AGENTS.md`、钩子/settings
-消息）**默认为韩语**（#36 反转——韩语是事实来源，英语是翻译出的覆盖层）。
-`--lang en` 会把英文翻译叠加在最上层，且最后应用——在基础复制、forge 预设、
-技术栈预设之后——用 `presets/lang-en/base` +
-`presets/lang-en/forge-<forge>` + `presets/lang-en/stacks/<stack>` 的内容
-覆盖同名文件。
-
-```bash
-agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
-```
-
-`.claude/hooks/pre-commit.sh` 永远不会被 `--lang` 覆盖（它是技术栈片段
-拼接进去的文件——消息只有单一语言，代码不受语言影响）。`--update`
-只刷新韩语基础文件；若需要重新应用英文覆盖层，请在其后再带
-`--lang en` 运行一次。
-
-## Usage 1 — 脚本
-
-```bash
-git clone https://github.com/leeyudok/agents-scaffold.git
-# --forge 默认为 github；GitLab 仓库请用 --forge gitlab
-agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
-```
-
-省略 `--forge`/`--stack`/`--name` 即进入交互模式——脚本会依次询问
-（forge 默认为 github）。
-
-### 选项
-
-| 选项 | 说明 |
+| 文档 | 内容 |
 |---|---|
-| `<target-dir>` | 目标目录。默认 `.` |
-| `--forge <forge>` | `github`（默认）或 `gitlab` |
-| `--lang <lang>` | `ko`（默认）或 `en` |
-| `--stack <list>` | 逗号分隔的技术栈预设列表。省略时进入交互式提问 |
-| `--name <name>` | `{{PROJECT_NAME}}` 的替换值。默认 = 目标目录名 |
-| `--yes` | 跳过交互式提问（非交互模式） |
-| `--update` | 刷新已引导项目的基础文件（见下文） |
-
-### 远程一键安装（无需 clone）
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
-```
-
-当脚本检测到自己并非从本地检出运行时（例如管道执行），会将
-`AGENTS_SCAFFOLD_REPO` 的 tarball（默认：
-`github.com/leeyudok/agents-scaffold`，可通过环境变量覆盖）下载到临时目录，
-并将其作为模板来源。用 `AGENTS_SCAFFOLD_REF` 固定分支/标签
-（默认 `main`）。
-
-### 更新基础文件 — `--update`
-
-将最新的基础文件（`.claude/`、`AGENTS.md`、`CLAUDE.md`、
-`GEMINI.md`）应用到已完成引导的项目。
-
-```bash
-agents-scaffold/bin/agents-scaffold.sh --update /path/to/existing-repo
-```
-
-- `.claude/hooks/pre-commit.sh` 始终被跳过——技术栈片段已被拼接
-  进去，需要手动合并。
-- 其他基础文件内容相同时跳过；有差异时保留现有文件，新版本写为
-  `<file>.new`（占位符替换同样作用于 `.new` 文件）。
-- 结束时打印新增 / 待更新 / 跳过 / 未变更文件的汇总——用 `diff`
-  查看 `.new` 文件后手动应用。
-
-## Usage 2 — GitLab 模板
-
-若想在创建新项目时自动应用这套配置，
-请参阅 **[docs/GITLAB_TEMPLATE.md](docs/GITLAB_TEMPLATE.md)**。
-
-> 注意：该工作流假定使用自托管 GitLab 实例。在 **GitLab CE** 上，
-> 原生的自定义项目模板属于 Premium 功能、不可用——
-> 请改用 **Import by URL + `bin/agents-scaffold.sh`** 或**仅用脚本**。
-> 创建/导入后运行一次 `bin/agents-scaffold.sh .`，即可应用所选
-> 技术栈、替换占位符，并自清理 `bin/`/`presets/`/`docs/superpowers/`。
-
-## 占位符替换
-
-| 令牌 | 值 |
-|---|---|
-| `{{PROJECT_NAME}}` | `--name` 的值，或目标目录名 |
-| `{{JAVA_VERSION}}` | `1.8`（springboot 预设默认值） |
-
-## 关键模式
-
-- **P0/P1/P2 优先级分级**：定义于 `common.md` + `AGENTS.md`。P0 = 安全/密钥/数据破坏，无一例外。
-- **SDLC 角色分离**：developer/tester/verifier 三个 agent + `/sdlc-cycle` 自动化命令。
-- **skill-evolve / agent-evolve**：从错误中提炼 "Learned warnings" 并追加的自我改进模式。`skill-evolve` 作用于 `.claude/skills/*.md`，`agent-evolve` 作用于 `.claude/agents/*.md`。
-- **Memory SSOT**：`.claude/memory/`（不使用系统默认路径）。类型前缀：`project_`/`feedback_`/`reference_`/`user_`。
-- **按路径作用域加载的规则**：frontmatter `paths:` 使规则仅在处理匹配文件时自动加载。
-- **多 agent 隔离**：并行 subagent 可能同时触碰同一文件时，使用 `isolation: "worktree"`。
+| [docs/OPTIONS.zh.md](docs/OPTIONS.zh.md) | 全部选项 — 10 种技术栈预设、`--forge`、`--harness`、`--lang`、用法、占位符替换、需求打磨工具的挑选 |
+| [docs/INTERNALS.zh.md](docs/INTERNALS.zh.md) | 内部结构 — 生成的完整 `.claude/` 目录树、关键模式 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献指南 |
 
 ## 贡献
 
