@@ -157,10 +157,23 @@ bin/                    agents-scaffold.sh 부트스트랩 스크립트
 | 값 | 대상 | 하는 일 |
 |---|---|---|
 | `claude` (기본) | Claude Code | 전체 설치 — settings.json 훅 바인딩·서브에이전트·슬래시 커맨드·workflows 포함 |
-| `codex` | Codex 등 AGENTS.md 하네스 | 하네스 중립 계층(AGENTS.md·rules·skills·hooks·memory)만 설치, Claude 전용 계층 제거, pre-commit 게이트를 **진짜 `.git/hooks/pre-commit`** 으로 배선 |
-| `all` | 혼용 팀 | 전체 설치 + git hook 배선 (Claude Code 는 PreToolUse, 그 외 하네스는 git hook 으로 같은 게이트를 탄다) |
+| `codex` | Codex 등 AGENTS.md 하네스 | 하네스 중립 계층(AGENTS.md·rules·skills·hooks·memory)만 설치, Claude 전용 계층 제거 |
+| `all` | 혼용 팀 | 전체 설치 |
 
-Codex 는 `AGENTS.md` 를 네이티브로 읽으므로 규칙 계층은 그대로 동작한다. 기존 `.git/hooks/pre-commit` 이 있으면 덮어쓰지 않고 경고만 낸다.
+**보장 수준은 2단이다 (#21)** — "지원한다/안 한다" 이분법이 아니다.
+
+| 수준 | 무엇이 성립하나 | 어느 하네스에서 |
+|---|---|---|
+| **baseline** | `AGENTS.md` 본문의 P0/P1(선택한 스택 P0 포함) + **진짜 `.git/hooks/pre-commit` 게이트** + CI | **전 하네스, `--harness` 값 무관.** 하네스가 무엇을 읽든, 사람이 터미널에서 직접 커밋하든 동일하게 걸린다 |
+| **full** | baseline + 그 하네스의 네이티브 계층(서브에이전트·스킬·슬래시 커맨드·조건부 룰 로딩·lifecycle 훅) | 어댑터가 실측 검증된 하네스만 |
+
+git hook 은 **하네스와 무관하게 항상 배선된다**(#21). Claude Code 의 `PreToolUse` 훅은 그 세션이
+Bash 툴로 커밋할 때만 발동하므로 조기 피드백 계층이지 강제선이 아니다 — 결정적 강제선은
+하네스 밖(`.git/hooks` + CI)에 둔다. 기존 `.git/hooks/pre-commit` 이 있으면 덮어쓰지 않고 경고만 낸다.
+
+선택한 스택의 P0 는 `AGENTS.md` **본문에 직접 삽입**된다 — `.claude/rules/` 참조 링크에 의존하지
+않으므로 `.claude/` 를 로드하지 않는 하네스에서도 도달 가능하다. 선택하지 않은 스택은 삽입되지
+않는다(Codex instruction 합산 기본 한도 32KiB — context flooding 방지).
 
 **실측 검증 (2026-08)**: Codex(codex-cli 0.149.0)는 `codex` 모드 산출물의 AGENTS.md 를 자동 로드해 룰 티어를 정확히 답했고, `.env` 커밋 지시를 **P0 규칙을 근거로 스스로 거부**했다(1차 방어). 모델이 시도하더라도 git hook 이 exit 2 로 차단한다(2차 방어, 테스트 커버). Antigravity(agy 1.1.17)는 내장 문서상 `AGENTS.md`/`.agents/rules/` 를 지원하나 **headless(`-p`) 모드에서 규칙 미로드가 실측**됐다 — 인터랙티브 모드는 미검증이므로 지원을 보장하지 않는다.
 

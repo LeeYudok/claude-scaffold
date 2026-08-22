@@ -3,7 +3,9 @@
 이 파일은 이 저장소에서 작업할 때 AI 에이전트(Claude Code·Gemini CLI·Codex 등)가 따르는
 **단일 진실원천(SSOT)** 이다. 프로젝트 브레인. `CLAUDE.md`·`GEMINI.md` 는 이 파일을 참조한다.
 
-@.claude/memory/MEMORY.md
+이 파일은 **자체 완결**이어야 한다 — 아래 P0/P1 은 다른 파일 로딩 없이 여기서 읽힌다.
+`@` import 는 Claude Code 전용 문법이라 하네스 중립 파일인 여기에 두지 않는다
+(메모리 인덱스 자동 로드는 `CLAUDE.md`·`GEMINI.md` 가 담당).
 
 ## 메모리 경로 오버라이드
 
@@ -59,7 +61,14 @@ P0 위반 시 즉시 작업 중단 + 사용자 에스컬레이션.
 - **데이터**: 프로덕션 DB에 `DELETE/DROP/TRUNCATE` 전 사용자 명시 동의
 - **git**: `force push` / `reset --hard` 전 확인. `.env` 스테이징 금지
 - **인증**: 인증 없는 API 엔드포인트 신규 추가 금지
-- **스택별 P0**: 각 `.claude/rules/<stack>.md` 의 `## P0` 섹션 참조
+
+#### 스택별 P0
+
+선택한 스택의 P0 는 아래에 **직접 삽입**된다(부트스트랩 시점 생성). 참조 링크에 의존하지
+않으므로 `.claude/` 를 로드하지 않는 하네스에서도 도달 가능하다. 상세 규약은
+`.claude/rules/<stack>.md` 에 있다.
+
+<!-- STACK P0 -->
 
 ### P1 — 필수 (AI 자율 실행 범위, 위반 시 PR 차단)
 

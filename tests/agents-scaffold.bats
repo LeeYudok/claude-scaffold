@@ -544,7 +544,7 @@ JSP
   [ "$status" -eq 2 ]
 }
 
-@test "harness all keeps everything and wires git hook; default claude does not touch .git/hooks" {
+@test "harness all keeps everything and wires git hook; default claude also wires it (#21)" {
   t="$BATS_TEST_TMPDIR/allmode"
   mkdir -p "$t"
   git -C "$t" init -q
@@ -554,13 +554,70 @@ JSP
   [ -f "$t/CLAUDE.md" ]
   [ -x "$t/.git/hooks/pre-commit" ]
 
+  # #21: git hook 은 하네스와 무관하게 항상 배선된다. Claude Code 의 PreToolUse 훅은
+  # 그 세션이 Bash 툴로 커밋할 때만 발동하므로, 사람이 터미널에서 직접 커밋하거나
+  # 다른 하네스가 커밋하면 게이트를 타지 않았다 (이전 동작: claude 모드에서 미배선).
   t2="$BATS_TEST_TMPDIR/claudemode"
   mkdir -p "$t2"
   git -C "$t2" init -q
   run bash "$SCRIPT" "$t2" --forge github --name claude-app --yes
   [ "$status" -eq 0 ]
-  [ ! -e "$t2/.git/hooks/pre-commit" ]
+  [ -x "$t2/.git/hooks/pre-commit" ]
 
   run bash "$SCRIPT" "$BATS_TEST_TMPDIR" --harness nope --yes
   [ "$status" -eq 1 ]
+}
+
+@test "default harness (claude) gate blocks a staged .env through the real git hook (#21)" {
+  t="$BATS_TEST_TMPDIR/claudegate"
+  mkdir -p "$t"
+  git -C "$t" init -q
+  run bash "$SCRIPT" "$t" --forge github --name claude-gate --yes
+  [ "$status" -eq 0 ]
+  cd "$t"
+  echo 'X=1' > .env
+  git add -f .env
+  run bash .git/hooks/pre-commit
+  [ "$status" -eq 2 ]
+}
+
+@test "stack P0 is inlined into AGENTS.md body, not left as a rules reference (#21)" {
+  t="$BATS_TEST_TMPDIR/p0inline"
+  mkdir -p "$t"
+  run bash "$SCRIPT" "$t" --forge github --stack python,springboot --name p0-app --yes
+  [ "$status" -eq 0 ]
+  # 선택한 두 스택의 P0 가 본문에 삽입된다
+  grep -q '^\*\*python\*\*$' "$t/AGENTS.md"
+  grep -q '^\*\*springboot\*\*$' "$t/AGENTS.md"
+  grep -q 'mypy' "$t/AGENTS.md"
+  # 선택하지 않은 스택은 삽입되지 않는다 (context flooding 방지)
+  ! grep -q '^\*\*rust\*\*$' "$t/AGENTS.md"
+  # 참조 위임 문구는 사라졌다
+  ! grep -q '.claude/rules/<stack>.md` 의 `## P0` 섹션 참조' "$t/AGENTS.md"
+}
+
+@test "AGENTS.md carries no Claude-only @import; CLAUDE.md/GEMINI.md own it (#21)" {
+  t="$BATS_TEST_TMPDIR/noimport"
+  mkdir -p "$t"
+  run bash "$SCRIPT" "$t" --forge github --name noimport-app --yes
+  [ "$status" -eq 0 ]
+  run grep -c '^@' "$t/AGENTS.md"
+  [ "$output" = "0" ]
+  grep -q '^@AGENTS.md$' "$t/CLAUDE.md"
+  grep -q '^@.claude/memory/MEMORY.md$' "$t/CLAUDE.md"
+  grep -q '^@.claude/memory/MEMORY.md$' "$t/GEMINI.md"
+}
+
+@test "every stack preset has a P0 section and an AGENTS.partial.md (#21)" {
+  for d in "$REPO_ROOT"/presets/*/; do
+    name="$(basename "$d")"
+    case "$name" in forge-*|lang-*) continue ;; esac
+    [ -f "$d/AGENTS.partial.md" ] || { echo "missing AGENTS.partial.md: $name"; return 1; }
+    rf="$(find "$d/.claude/rules" -name '*.md' -type f | head -1)"
+    grep -q '^## P0' "$rf" || { echo "missing ## P0: $rf"; return 1; }
+    en="$REPO_ROOT/presets/lang-en/stacks/$name"
+    [ -f "$en/AGENTS.partial.md" ] || { echo "missing en AGENTS.partial.md: $name"; return 1; }
+    erf="$(find "$en/.claude/rules" -name '*.md' -type f | head -1)"
+    grep -q '^## P0' "$erf" || { echo "missing en ## P0: $erf"; return 1; }
+  done
 }

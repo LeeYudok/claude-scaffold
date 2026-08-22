@@ -162,10 +162,19 @@ tests/                    引导脚本的 bats 回归测试套件
 | 取值 | 目标 | 行为 |
 |---|---|---|
 | `claude`（默认） | Claude Code | 完整安装 — 含 settings.json 钩子绑定、子代理、斜杠命令、workflows |
-| `codex` | Codex 及其他 AGENTS.md harness | 仅安装与 harness 无关的层（AGENTS.md、rules、skills、hooks、memory），移除 Claude 专用层，并把 pre-commit 门禁接入**真正的 `.git/hooks/pre-commit`** |
-| `all` | 混合团队 | 完整安装 + git 钩子（Claude Code 走 PreToolUse，其余 harness 通过 git 钩子经过同一道门禁） |
+| `codex` | Codex 及其他 AGENTS.md harness | 仅安装与 harness 无关的层（AGENTS.md、rules、skills、hooks、memory），移除 Claude 专用层 |
+| `all` | 混合团队 | 完整安装 |
 
-Codex 原生读取 `AGENTS.md`，规则层可直接生效。已存在的 `.git/hooks/pre-commit` 不会被覆盖，只会给出警告。
+**保障分为两级（#21）** — 不是"支持/不支持"的二分法。
+
+| 级别 | 成立的内容 | 适用 harness |
+|---|---|---|
+| **baseline** | `AGENTS.md` 正文中的 P0/P1（含所选技术栈的 P0）+ **真正的 `.git/hooks/pre-commit` 门禁** + CI | **全部 harness，与 `--harness` 取值无关。** 无论 harness 读取什么，也无论是否由人在终端直接提交，门禁都会生效 |
+| **full** | baseline + 该 harness 的原生层（子代理、skills、斜杠命令、按路径的条件加载、lifecycle 钩子） | 仅限适配器经过实测验证的 harness |
+
+git 钩子**与 harness 无关，始终接入**（#21）。Claude Code 的 `PreToolUse` 钩子只在该会话通过 Bash 工具提交时触发，因此它属于早期反馈层而非强制线 — 决定性的强制线放在 harness 之外（`.git/hooks` + CI）。已存在的 `.git/hooks/pre-commit` 不会被覆盖，只会给出警告。
+
+所选技术栈的 P0 会**直接插入 `AGENTS.md` 正文**，不依赖 `.claude/rules/` 引用链接，因此在不加载 `.claude/` 的 harness 上同样可达。未选择的技术栈不会被插入（Codex 指令合计默认上限为 32KiB — 以避免 context flooding）。
 
 **实测验证（2026-08）**：Codex（codex-cli 0.149.0）会自动加载 `codex` 模式产物中的 AGENTS.md，正确回答了规则分级，并**依据 P0 规则主动拒绝了提交 `.env` 的指令**（第一道防线）。即使模型执意尝试，git 钩子也会以 exit 2 拦截（第二道防线，已有测试覆盖）。Antigravity（agy 1.1.17）虽在文档中声明支持 `AGENTS.md`/`.agents/rules/`，但**实测其 headless（`-p`）模式不加载规则** — 交互模式未验证，因此不保证对 Antigravity 的支持。
 

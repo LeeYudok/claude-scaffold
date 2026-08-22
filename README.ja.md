@@ -164,10 +164,19 @@ tests/                    ブートストラップスクリプト用 bats リグ
 | 値 | 対象 | 動作 |
 |---|---|---|
 | `claude`（デフォルト） | Claude Code | フルインストール — settings.json のフックバインディング・サブエージェント・スラッシュコマンド・workflows を含む |
-| `codex` | Codex ほか AGENTS.md 対応ハーネス | ハーネス中立の層（AGENTS.md・rules・skills・hooks・memory）のみ導入し、Claude 専用層を除去。pre-commit ゲートを**実際の `.git/hooks/pre-commit`** に配線 |
-| `all` | 混在チーム | フルインストール + git フック（Claude Code は PreToolUse、他ハーネスは git フック経由で同じゲートを通る） |
+| `codex` | Codex ほか AGENTS.md 対応ハーネス | ハーネス中立の層（AGENTS.md・rules・skills・hooks・memory）のみ導入し、Claude 専用層を除去 |
+| `all` | 混在チーム | フルインストール |
 
-Codex は `AGENTS.md` をネイティブに読むため、ルール層はそのまま機能します。既存の `.git/hooks/pre-commit` は上書きせず、警告のみ出します。
+**保証レベルは 2 段階です（#21）** — 「対応している/していない」の二分法ではありません。
+
+| レベル | 成立する内容 | 対象ハーネス |
+|---|---|---|
+| **baseline** | `AGENTS.md` 本文の P0/P1（選択したスタックの P0 を含む）+ **実際の `.git/hooks/pre-commit` ゲート** + CI | **`--harness` の値に関係なく全ハーネス。** ハーネスが何を読むかによらず、人が端末から直接コミットしても同じように掛かります |
+| **full** | baseline + そのハーネスのネイティブ層（サブエージェント・skills・スラッシュコマンド・パススコープのルール読み込み・lifecycle フック） | アダプタが実測検証されたハーネスのみ |
+
+git フックは**ハーネスに関係なく常に配線されます**（#21）。Claude Code の `PreToolUse` フックはそのセッションが Bash ツールでコミットしたときにのみ発火するため、早期フィードバック層であって強制線ではありません — 決定的な強制線はハーネスの外（`.git/hooks` + CI）に置きます。既存の `.git/hooks/pre-commit` は上書きせず、警告のみ出します。
+
+選択したスタックの P0 は **`AGENTS.md` 本文に直接挿入**されます。`.claude/rules/` の参照リンクに依存しないため、`.claude/` を読み込まないハーネスでも到達可能です。選択していないスタックは挿入されません（Codex の指示合計はデフォルト 32KiB 上限 — context flooding を防ぐため）。
 
 **実測検証（2026-08）**：Codex（codex-cli 0.149.0）は `codex` モード成果物の AGENTS.md を自動で読み込み、ルール階層を正しく回答し、`.env` をコミットせよという指示を **P0 ルールを根拠に自ら拒否**しました（第一の防衛線）。モデルが強行しても git フックが exit 2 でブロックします（第二の防衛線、テスト済み）。Antigravity（agy 1.1.17）はドキュメント上 `AGENTS.md`/`.agents/rules/` をサポートすると記載していますが、**headless（`-p`）モードではルールを読み込まないことを実測** — インタラクティブモードは未検証のため、Antigravity 対応は保証しません。
 
