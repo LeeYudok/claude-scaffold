@@ -1,8 +1,8 @@
-# claude-scaffold
+# agents-scaffold
 
 [한국어](README.md) | [English](README.en.md) | [简体中文](README.zh.md) | 日本語
 
-[![tests](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml)
+[![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **フレームワークではありません — Claude Code のためのミニマルな fork-and-fill ブートストラップです**。
@@ -17,11 +17,11 @@ _30秒デモ: コマンド1つ → 記入済みの `.claude/` → ゲートが�
 
 ```bash
 # クローン不要、コマンド1つで
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 
 # またはローカルクローンから(オプション省略時は対話的にプロンプト)
-git clone https://github.com/leeyudok/claude-scaffold.git
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+git clone https://github.com/leeyudok/agents-scaffold.git
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 記入済みの `.claude/` ディレクトリ(エージェント、スキル、フック、paths スコープの
@@ -59,9 +59,9 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack 
 - **チーム/マルチセッションでも安全**: セッションごとの git worktree 分離が
   デフォルトなので、並行作業が互いを踏み荒らすことはありません。
 
-## なぜ claude-scaffold か
+## なぜ agents-scaffold か
 
-大規模なインストール型フレームワークやエージェント/スキルのカタログと違い、claude-scaffold は
+大規模なインストール型フレームワークやエージェント/スキルのカタログと違い、agents-scaffold は
 ランタイムも、プラグインシステムも、同期を保つべき中央レジストリも持ちません —
 これは `.claude/` ディレクトリのスケルトンと少数のスタックプリセットであり、
 一度リポジトリにコピーしたらあとは完全にあなたのものです。後からアップグレードすべきものは
@@ -126,7 +126,7 @@ presets/                  プリセット断片(コピー上書きモデル)
   forge-gitlab/           GitLab forge — glab、MR、`Closes #N` 自動クローズ(マージ後に確認)
   nextjs/ bun/ ...        スタック別断片(rules + pre-commit.partial.sh)
   lang-en/                英語オーバーレイ(base/forge-*/stacks/*)— 後述の `--lang` を参照
-bin/                      claude-scaffold.sh ブートストラップスクリプト
+bin/                      agents-scaffold.sh ブートストラップスクリプト
 tests/                    ブートストラップスクリプト用 bats リグレッションスイート
 ```
 
@@ -168,7 +168,7 @@ forge プリセット、スタックプリセットの後に適用されるた�
 の内容で上書きします。
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
 ```
 
 `.claude/hooks/pre-commit.sh` は `--lang` によるオーバーレイの対象外です
@@ -179,9 +179,9 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge githu
 ## Usage 1 — script
 
 ```bash
-git clone https://github.com/leeyudok/claude-scaffold.git
+git clone https://github.com/leeyudok/agents-scaffold.git
 # --forge のデフォルトは github。GitLab リポジトリには --forge gitlab を使う
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 `--forge`/`--stack`/`--name` を省略すると対話モードで実行され、スクリプトが
@@ -202,13 +202,13 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack 
 ### リモートワンコマンドインストール(クローン不要)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 ```
 
 スクリプトはローカルチェックアウトから実行されていないこと(パイプ実行など)を検知すると、
-`CLAUDE_SCAFFOLD_REPO` の tarball(デフォルト: `github.com/leeyudok/claude-scaffold`、
+`AGENTS_SCAFFOLD_REPO` の tarball(デフォルト: `github.com/leeyudok/agents-scaffold`、
 環境変数で上書き可)を一時ディレクトリにダウンロードし、テンプレートソースとして
-使用します。ブランチ/タグの固定は `CLAUDE_SCAFFOLD_REF`(デフォルト `main`)で行います。
+使用します。ブランチ/タグの固定は `AGENTS_SCAFFOLD_REF`(デフォルト `main`)で行います。
 
 ### ベースの更新 — `--update`
 
@@ -216,7 +216,7 @@ curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/c
 `CLAUDE.md`、`GEMINI.md`)を適用します。
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
+agents-scaffold/bin/agents-scaffold.sh --update /path/to/existing-repo
 ```
 
 - `.claude/hooks/pre-commit.sh` は常にスキップされます — スタックパーシャルが
@@ -234,8 +234,8 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 > 注: このワークフローはセルフホストの GitLab インスタンスを前提とします。**GitLab CE** では
 > ネイティブのカスタムプロジェクトテンプレートは Premium 機能のため利用できません —
-> 代わりに **Import by URL + `bin/claude-scaffold.sh`**、または**スクリプト単体**を使ってください。
-> 作成/インポート後に `bin/claude-scaffold.sh .` を1回実行すると、選択したスタックの適用、
+> 代わりに **Import by URL + `bin/agents-scaffold.sh`**、または**スクリプト単体**を使ってください。
+> 作成/インポート後に `bin/agents-scaffold.sh .` を1回実行すると、選択したスタックの適用、
 > プレースホルダー置換、`bin/`/`presets/`/`docs/superpowers/` のセルフクリーンが行われます。
 
 ## プレースホルダー置換
@@ -258,7 +258,7 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 ワークフローは [CONTRIBUTING.md](CONTRIBUTING.md)、スタックプリセットの形式は
 [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) を参照してください。
-初めての方は [`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) から始めるのがおすすめです —
+初めての方は [`good first issue`](https://github.com/LeeYudok/agents-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) から始めるのがおすすめです —
 レイアウトが完全にテンプレート化されているため、新しいスタックプリセットの追加が最も取り組みやすい課題です。
 
 ## ライセンス

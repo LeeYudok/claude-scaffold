@@ -1,7 +1,7 @@
 # ECC manifests 구조 분석 — 프리셋 확장 시 참고
 
 > 출처: ECC([affaan-m/ECC](https://github.com/affaan-m/ECC), MIT) `manifests/` (2026-07-09 스냅샷).
-> claude-scaffold 프리셋(현 10종 스택 + forge 2종)이 더 늘어나 "스택 = 프리셋 1개" 평면 구조가
+> agents-scaffold 프리셋(현 10종 스택 + forge 2종)이 더 늘어나 "스택 = 프리셋 1개" 평면 구조가
 > 버거워질 때 참고할 선택 설치 설계. **지금 당장 도입하는 것 아님** — 임계점은 아래 "도입 판단" 참조.
 
 ## 3계층 모델
@@ -29,9 +29,9 @@ profiles (7종)  ──펼침──▶  modules (33종)  ◀──참조──  
 - **components 는 UX 레이어**: 여러 별칭(`lang:typescript`, `framework:react`)이 같은 모듈
   (`framework-language`)로 수렴 — 사용자 언어와 설치 단위를 분리.
 
-## claude-scaffold 현행과 대응
+## agents-scaffold 현행과 대응
 
-| ECC | claude-scaffold 현행 | 비고 |
+| ECC | agents-scaffold 현행 | 비고 |
 |---|---|---|
 | profile | 없음 (전 스택 공통 base + `--stack` 나열) | base `.claude/` 가 사실상 단일 core 프로파일 |
 | module | `presets/<stack>/` 디렉터리 | 의존성·비용 메타데이터 없음, 경로 규약(`rules/<stack>.md` + `pre-commit.partial.sh`)이 암묵 스키마 |
@@ -48,10 +48,10 @@ profiles (7종)  ──펼침──▶  modules (33종)  ◀──참조──  
 
 도입 시 최소안: `presets/manifest.json` 1개 파일로 시작
 (`{id, description, dependencies[], cost}` 만 — profiles/components 분리는 그 다음 단계),
-`bin/claude-scaffold.sh` 의 스택 머지 루프 앞에 의존성 펼침만 추가.
+`bin/agents-scaffold.sh` 의 스택 머지 루프 앞에 의존성 펼침만 추가.
 
 ## 반면교사
 
-- ECC 는 매니페스트 3개 + 인스톨러 JS(수백 줄)를 스스로 유지보수 — claude-scaffold 규모(프리셋 10종)에
+- ECC 는 매니페스트 3개 + 인스톨러 JS(수백 줄)를 스스로 유지보수 — agents-scaffold 규모(프리셋 10종)에
   이 복잡도를 미리 들여오면 배보다 배꼽. **필요 신호 전 도입 금지.**
 - `defaultInstall: true` 모듈이 늘면 "minimal" 이 무거워지는 drift — 프로파일별 스냅샷 테스트가 없으면 조용히 비대해진다.

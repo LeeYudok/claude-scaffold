@@ -1,8 +1,8 @@
-# claude-scaffold
+# agents-scaffold
 
 한국어 | [English](README.en.md) | [简体中文](README.zh.md) | [日本語](README.ja.md)
 
-[![tests](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml)
+[![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **프레임워크가 아니라 fork-and-fill 미니멀 부트스트랩** — Claude Code 용 `.claude/` 초기
@@ -17,11 +17,11 @@ _30초 데모: 명령 한 번 → `.claude/` 완성 → 시크릿 커밋은 게�
 
 ```bash
 # clone 없이 원커맨드
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 
 # 또는 로컬 clone 에서 (옵션 생략 시 대화형 프롬프트)
-git clone https://github.com/leeyudok/claude-scaffold.git
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+git clone https://github.com/leeyudok/agents-scaffold.git
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 결과물은 채워진 `.claude/` 디렉터리(agents·skills·hooks·paths 스코프 rules·memory),
@@ -57,9 +57,9 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack 
 - **팀/멀티세션 안전**: 세션마다 git worktree 격리 규칙이 기본이라 병렬 작업이 서로를
   덮어쓰지 않는다.
 
-## 왜 claude-scaffold 인가
+## 왜 agents-scaffold 인가
 
-대형 설치형 프레임워크나 에이전트/스킬 카탈로그와 달리, claude-scaffold 은 런타임도 플러그인
+대형 설치형 프레임워크나 에이전트/스킬 카탈로그와 달리, agents-scaffold 은 런타임도 플러그인
 시스템도 동기화할 중앙 레지스트리도 없다 — `.claude/` 디렉터리 골격 + 스택 프리셋 몇 개를
 레포에 한 번 복사하면 그걸로 끝이고, 이후 업그레이드할 대상 자체가 없다. fork 해서
 placeholder 를 채우고 안 쓰는 걸 지우면, 결과는 레포의 다른 코드와 똑같이 버전 관리되는
@@ -122,7 +122,7 @@ presets/                프리셋 조각 (복사 덮어쓰기 방식)
   forge-gitlab/         GitLab forge — glab, MR, `Closes #N` 자동 클로즈(머지 후 확인)
   nextjs/ bun/ ...      스택별 조각 (rules + pre-commit.partial.sh)
   lang-en/              영어 오버레이 (base/forge-*/stacks/*) — 아래 `--lang` 참조
-bin/                    claude-scaffold.sh 부트스트랩 스크립트
+bin/                    agents-scaffold.sh 부트스트랩 스크립트
 ```
 
 ## 스택 프리셋
@@ -160,7 +160,7 @@ bin/                    claude-scaffold.sh 부트스트랩 스크립트
 콘텐츠로 동일 파일을 덮어쓴다.
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
 ```
 
 `.claude/hooks/pre-commit.sh` 는 `--lang` 오버레이 대상이 아니다(스택 파셜이 삽입되는
@@ -170,9 +170,9 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge githu
 ## 사용법 1 — 스크립트
 
 ```bash
-git clone https://github.com/leeyudok/claude-scaffold.git
+git clone https://github.com/leeyudok/agents-scaffold.git
 # --forge 기본값 github. GitLab 레포면 --forge gitlab
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 대화형으로 쓰려면 `--forge`/`--stack`/`--name` 생략 → 프롬프트가 묻는다(forge 기본 github).
@@ -192,12 +192,12 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack 
 ### 원격 원커맨드 설치 (clone 불필요)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 ```
 
-로컬에 레포가 없는 상태(파이프 실행)로 감지되면 `CLAUDE_SCAFFOLD_REPO`(기본
-`github.com/leeyudok/claude-scaffold`, env 로 오버라이드) tarball 을 임시 디렉터리에 받아 템플릿 소스로 쓴다. 브랜치/태그 지정은
-`CLAUDE_SCAFFOLD_REF`(기본 `main`) 로 오버라이드.
+로컬에 레포가 없는 상태(파이프 실행)로 감지되면 `AGENTS_SCAFFOLD_REPO`(기본
+`github.com/leeyudok/agents-scaffold`, env 로 오버라이드) tarball 을 임시 디렉터리에 받아 템플릿 소스로 쓴다. 브랜치/태그 지정은
+`AGENTS_SCAFFOLD_REF`(기본 `main`) 로 오버라이드.
 
 ### 베이스 갱신 — `--update`
 
@@ -205,7 +205,7 @@ curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/c
 반영한다.
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
+agents-scaffold/bin/agents-scaffold.sh --update /path/to/existing-repo
 ```
 
 - `.claude/hooks/pre-commit.sh` 는 스택 파셜이 삽입돼 있어 항상 건너뛴다(수동 병합 필요).
@@ -219,8 +219,8 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 새 프로젝트 생성 시 구성을 자동으로 깔리게 하는 법은 **[docs/GITLAB_TEMPLATE.md](docs/GITLAB_TEMPLATE.md)** 참조.
 
 > 주의: self-hosted GitLab 기준. **CE** 는 네이티브 커스텀 프로젝트 템플릿(Premium)이 불가.
-> CE 에서는 **Import by URL + `bin/claude-scaffold.sh`**(B안) 또는 **스크립트 단독**(C안)을 쓴다.
-> 생성/주입 후 `bin/claude-scaffold.sh .` 1회 실행 → 스택 적용 + 치환 + `bin/`·`presets/`·`docs/superpowers/` self-clean.
+> CE 에서는 **Import by URL + `bin/agents-scaffold.sh`**(B안) 또는 **스크립트 단독**(C안)을 쓴다.
+> 생성/주입 후 `bin/agents-scaffold.sh .` 1회 실행 → 스택 적용 + 치환 + `bin/`·`presets/`·`docs/superpowers/` self-clean.
 
 ## 치환 플레이스홀더
 
@@ -241,7 +241,7 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 ## Contributing
 
 워크플로는 [CONTRIBUTING.md](CONTRIBUTING.md), 스택 프리셋 규격은 [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) 참조.
-처음이라면 [`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 라벨부터 — 새 스택 프리셋 추가가 구조가 정형화돼 있어 가장 만만하다.
+처음이라면 [`good first issue`](https://github.com/LeeYudok/agents-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 라벨부터 — 새 스택 프리셋 추가가 구조가 정형화돼 있어 가장 만만하다.
 
 ## License
 
