@@ -47,11 +47,8 @@ prompt 编写也没关系：
   标记——即使 Claude 忘了规则，门禁也能兜底。
 - **一键命令**：`/review`（代码评审 + 安全审计）、`/status`、
   `/knowledge-graph`（文档链接检查器）、`/sonar`。
-- **需求打磨，两种方式任选**：**`grill-me`**（内置）对规格说明进行多轮
-  拷问；**superpowers 的 `brainstorming`**
-  （[obra/superpowers](https://github.com/obra/superpowers)，独立插件）
-  以协作方式发散再收敛想法。两者都装好后按任务选用——已有方向的功能
-  用 grill，一张白纸则用 brainstorm。
+- **需求打磨，三种方式任选**：除内置的 **`grill-me`** 外，还可按场景接入两个外部工具 →
+  [挑选需求打磨工具](#挑选需求打磨工具)。
 - **跨会话留存的记忆**：项目经验持续沉淀在 `.claude/memory/` 下，
   下次会话自动加载，并与团队共享。
 - **自我进化**：skill-evolve/agent-evolve 会根据失败反馈重写 skill/agent
@@ -157,6 +154,25 @@ tests/                    引导脚本的 bats 回归测试套件
 注入的文件：`.claude/rules/forge.md`（始终加载），以及
 `.claude/commands/fix-issue.md` 和 `sdlc-cycle.md` 的 forge 变体（覆盖基础版本）。
 基础文件保持 forge 中立（"issue / PR·MR"）。
+
+## 挑选需求打磨工具
+
+实现之前打磨需求的手段有三种，**性质各不相同，按任务挑选**。内置的只有 `grill-me`，另外两个需单独安装。
+
+| | `grill-me` | superpowers | Ouroboros |
+|---|---|---|---|
+| **范围** | 仅拷问 | 覆盖整个工作流 | 拷问 → 规格 → 执行 → 评估 循环 |
+| **状态** | 止于对话之内 | 对话 + 文件产物 | 由 MCP 服务器持久管理 |
+| **重量** | 轻 | 中 | 重 — 每个问题都会 fanout 子代理 |
+| **安装** | **内置**（`.claude/skills/grill-me/`） | 插件 [obra/superpowers](https://github.com/obra/superpowers) | 市场 [Q00/ouroboros](https://github.com/Q00/ouroboros)（附带 MCP 服务器） |
+
+**选择标准**
+
+- 方向已定的功能，想找出规格中的漏洞 → **`grill-me`**。无需安装，一轮对话即可。
+- 一张白纸需要发散再收敛，并留下文档产物 → **superpowers 的 `brainstorming`**。
+- 需求模糊的大型工作，需要**先规格化，再以循环方式执行与评估** → **Ouroboros**。会话中断后状态仍在，但 token 成本三者中最高。
+
+按重量逐级升级，且**只向上走** — 轻量方案够用的任务上动用 Ouroboros 只会推高成本。三者即便都已安装也不会自动触发，由使用者按任务选定。
 
 ## Harness（`--harness`）
 

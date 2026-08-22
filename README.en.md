@@ -48,11 +48,9 @@ you're new to prompting:
   Claude forgets.
 - **One-shot commands**: `/review` (code review + security audit), `/status`,
   `/knowledge-graph` (doc link checker), `/sonar`.
-- **Requirements hardening, your pick of two**: **`grill-me`** (bundled) interrogates
-  a spec over multiple rounds; **superpowers' `brainstorming`**
-  ([obra/superpowers](https://github.com/obra/superpowers), separate plugin)
-  diverges and converges on ideas collaboratively. With both installed, pick per
-  task — grill a feature that already has direction, brainstorm a blank page.
+- **Requirements hardening, your pick of three**: beyond the bundled **`grill-me`**, two
+  external tools plug in depending on the job →
+  [Picking a requirements-hardening tool](#picking-a-requirements-hardening-tool).
 - **Memory that survives sessions**: project learnings accumulate under
   `.claude/memory/`, auto-load next session, and are shared with the team.
 - **Self-evolving**: skill-evolve/agent-evolve rewrite skill/agent definitions from
@@ -159,6 +157,30 @@ Injects the issue/PR workflow for your forge. Merged before stack presets.
 Injected files: `.claude/rules/forge.md` (always loaded) plus forge variants of
 `.claude/commands/fix-issue.md` and `sdlc-cycle.md` (overwrite the base). Base
 files stay forge-neutral ("issue / PR·MR").
+
+## Picking a requirements-hardening tool
+
+Three tools harden requirements before implementation, and **they differ enough that you pick per
+task.** Only `grill-me` is bundled; the other two install separately.
+
+| | `grill-me` | superpowers | Ouroboros |
+|---|---|---|---|
+| **Scope** | interrogation only | the whole workflow | interrogate → spec → run → evaluate loop |
+| **State** | stays in the conversation | conversation + file artifacts | an MCP server keeps it persistently |
+| **Weight** | light | medium | heavy — fans out a subagent per question |
+| **Install** | **bundled** (`.claude/skills/grill-me/`) | plugin, [obra/superpowers](https://github.com/obra/superpowers) | marketplace, [Q00/ouroboros](https://github.com/Q00/ouroboros) (ships an MCP server) |
+
+**How to choose**
+
+- A feature that already has direction, and you want the holes in its spec found → **`grill-me`**.
+  Nothing to install, one conversation and you're done.
+- A blank page you need to diverge and converge on, with a document to keep → **superpowers'
+  `brainstorming`**.
+- A large, vaguely specified job that has to be **turned into a spec and then run and evaluated in
+  a loop** → **Ouroboros**. State survives a dropped session, at the highest token cost of the three.
+
+Escalate by weight, and **only upward** — reaching for Ouroboros where the light option would do
+just costs more. None of them fire automatically, even with all three installed; you pick per task.
 
 ## Harness (`--harness`)
 
