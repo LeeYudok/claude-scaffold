@@ -7,3 +7,6 @@
 ## 프로젝트
 - [제목](project_xxx.md) — 한 줄 훅
 -->
+
+- [하네스 설정 계약 실측](reference_harness-config-contracts.md) — Claude/Codex/agy 의 설정·디스커버리 경로와 함정(32KiB, trust boundary, PreToolUse 는 강제선 아님)
+- [이슈 #20 3자 교차리뷰 결론](project_agents-scaffold-multiagent-review.md) — compile-time emitter 확정, 해시검증 폐기→P0 reachability, 남은 후속 a~c
