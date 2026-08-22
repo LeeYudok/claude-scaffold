@@ -85,6 +85,11 @@ Codex (codex-cli 0.149.0) auto-loads the `codex`-mode AGENTS.md, answered the ru
 correctly, and **refused an instruction to commit a `.env`, citing the P0 rule** (first line of
 defense). If a model tries anyway, the git hook blocks it with exit 2 (second line, test-covered).
 
+The single source of truth for support status is [`docs/harness-matrix.json`](harness-matrix.json).
+This table is checked against that manifest by `scripts/check-harness-matrix.py` in CI — if a `full`
+tier has gone 90 days without re-measurement, or a verdict carries no evidence, **the build fails**.
+Re-measure with `scripts/spike-codex-contract.sh --dynamic`.
+
 **Known gap — Codex skills are not auto-discovered.** Codex discovers repository skills under
 `.agents/skills`, but `--harness codex` currently leaves them in `.claude/skills`. The rules layer
 (`AGENTS.md`) works; the skills layer does not — that is baseline, not full.

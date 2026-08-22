@@ -85,6 +85,11 @@ Codex(codex-cli 0.149.0)는 `codex` 모드 산출물의 AGENTS.md 를 자동 로
 답했고, `.env` 커밋 지시를 **P0 규칙을 근거로 스스로 거부**했다(1차 방어). 모델이 시도해도
 git hook 이 exit 2 로 차단한다(2차 방어, 테스트 커버).
 
+지원 상태의 단일 진실원천은 [`docs/harness-matrix.json`](harness-matrix.json) 이다. 이 표는
+그 manifest 와 대조되며, `scripts/check-harness-matrix.py` 가 CI 에서 검사한다 — `full` 등급이
+90일 넘게 재측정되지 않았거나 판정에 근거가 없으면 **빌드가 실패한다**. 재측정은
+`scripts/spike-codex-contract.sh --dynamic` 으로 수행한다.
+
 **알려진 갭 — Codex 스킬은 자동 발견되지 않는다.** Codex 의 저장소 스킬 발견 경로는
 `.agents/skills` 인데 현재 `--harness codex` 는 `.claude/skills` 를 남긴다. 규칙 계층
 (`AGENTS.md`)은 동작하지만 스킬은 그렇지 않다 — full 이 아니라 baseline 이다.

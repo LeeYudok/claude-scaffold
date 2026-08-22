@@ -157,6 +157,18 @@ EOF
 
 # --- 8) in-place self-clean ---
 
+@test "harness matrix manifest passes its own checker (#37)" {
+  run python3 "$REPO_ROOT/scripts/check-harness-matrix.py"
+  [ "$status" -eq 0 ]
+}
+
+@test "harness matrix checker actually fails an expired full tier (#37)" {
+  # 게이트가 실제로 막는지 확인한다 — 통과만 보면 무용지물인 검사기를 못 잡는다.
+  run python3 "$REPO_ROOT/scripts/check-harness-matrix.py" --today 2099-01-01
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"tier=full"* ]]
+}
+
 @test "in-place self-clean removes bin presets docs/superpowers (run against repo copy)" {
   copy="$BATS_TEST_TMPDIR/repo-copy"
   cp -R "$REPO_ROOT" "$copy"

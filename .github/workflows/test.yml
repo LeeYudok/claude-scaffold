@@ -19,3 +19,9 @@ jobs:
 
       - name: Run agents-scaffold.sh bats tests
         run: bats tests/agents-scaffold.bats
+
+      # 지원 매트릭스 게이트 (#37) — tier=full 인데 실측이 만료됐거나, 판정에 근거가
+      # 없거나, manifest 와 문서의 CLI 버전이 어긋나면 실패한다. 문서를 자동 수정하지
+      # 않는다 — 강등은 사람이 PR 로 반영한다.
+      - name: Check harness support matrix
+        run: python3 scripts/check-harness-matrix.py

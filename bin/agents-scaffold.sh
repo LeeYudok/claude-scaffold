@@ -40,7 +40,7 @@ directory and used as the template source.
 
 Flow: copy base (.claude/ + CLAUDE.md) -> merge forge preset -> merge selected stack presets
       -> merge lang-en overlay (if --lang en) -> substitute {{PLACEHOLDER}} -> chmod +x
-      -> in-place: self-clean bin/·presets/·docs/superpowers/.
+      -> in-place: self-clean bin/·presets/·scripts/·docs/superpowers/·docs/harness-matrix.json.
 EOF
 }
 
@@ -449,8 +449,10 @@ fi
 
 # 5) in-place self-clean (템플릿 흔적 제거)
 if [ "$INPLACE" -eq 1 ]; then
-  echo "== self-clean: removing bin/ presets/ docs/superpowers/ ==" >&2
-  rm -rf "$TARGET/bin" "$TARGET/presets" "$TARGET/docs/superpowers"
+  echo "== self-clean: removing bin/ presets/ scripts/ docs/superpowers/ docs/harness-matrix.json ==" >&2
+  rm -rf "$TARGET/bin" "$TARGET/presets" "$TARGET/scripts" "$TARGET/docs/superpowers"
+  # scripts/ 와 harness-matrix.json 은 이 저장소의 유지보수 자산이지 사용자 산출물이 아니다 (#37)
+  rm -f "$TARGET/docs/harness-matrix.json"
 fi
 
 echo "== Done. Fill in CLAUDE.md and .claude/ for your project. ==" >&2
