@@ -89,7 +89,7 @@ result is plain files under version control like any other code in the repo.
     sdlc-tester.md        AC/TC test-writing agent
     sdlc-verifier.md      pipeline execution + report agent
     agent-evolve.md       self-improving meta agent — refines agents/*.md from run feedback
-  commands/
+  commands/              (legacy on Claude Code — slash commands merged into skills)
     sonar.md             SonarQube analysis (CE task polling, sqp_/squ_ token handling)
     sdlc-cycle.md         5-stage SDLC automation
     knowledge-graph.md    regenerate the .claude knowledge graph + broken-link check
@@ -114,18 +114,18 @@ result is plain files under version control like any other code in the repo.
     review/                   code-reviewer + security-audit wrapper
     memory-factcheck/         memory fact-check — verify claims against code/DB/issues, correct stale
     security-precheck/        pre-audit security sweep → issues → parallel fixes
-  workflows/
+  workflows/             (not auto-loaded — invoked explicitly)
     rules-audit.js           stored Workflow example — scan/verify/repair with human merge gate
-  scripts/
+  scripts/               (not auto-loaded — invoked explicitly)
     knowledge_graph.py       .claude ecosystem graph + --check broken-link gate
   settings.json               hook wiring + default deny rules
 AGENTS.md                 project brain — rule SSOT (P0/P1/P2 + workflow)
-CLAUDE.md                 pointer to @AGENTS.md (Claude Code)
-GEMINI.md                 pointer to @AGENTS.md (Gemini CLI)
+CLAUDE.md                 @AGENTS.md + memory-index import (Claude Code)
+GEMINI.md                 @AGENTS.md + memory-index import (Gemini CLI)
 presets/                  preset fragments (copy-overwrite model)
   forge-github/           GitHub forge — gh, PRs, `Closes #N` auto-close
   forge-gitlab/           GitLab forge — glab, MRs, `Closes #N` auto-close (verify after merge)
-  nextjs/ bun/ ...        per-stack fragments (rules + pre-commit.partial.sh)
+  nextjs/ bun/ ...        per-stack fragments (rules + pre-commit.partial.sh + AGENTS.partial.md)
   lang-en/                English overlay (base/forge-*/stacks/*) — see `--lang` below
 bin/                      agents-scaffold.sh bootstrap script
 tests/                    bats regression suite for the bootstrap script
@@ -178,7 +178,29 @@ The git hook is **always wired, regardless of harness** (#21). Claude Code's `Pr
 
 The selected stack's P0 rules are **inlined into the `AGENTS.md` body**, so they do not depend on a `.claude/rules/` reference link and stay reachable on harnesses that never load `.claude/`. Stacks you did not select are not inlined (Codex caps combined instructions at 32KiB by default — this avoids context flooding).
 
-**Verified (2026-08)**: Codex (codex-cli 0.149.0) auto-loads the `codex`-mode AGENTS.md, answered the rule tiers correctly, and **refused an instruction to commit a `.env` citing the P0 rule** (first line of defense). If a model does try anyway, the git hook blocks it with exit 2 (second line, test-covered). Antigravity (agy 1.1.17) documents `AGENTS.md`/`.agents/rules/` support, but **headless (`-p`) mode measurably does not load rules** — interactive mode is unverified, so Antigravity support is not guaranteed.
+### Verified (2026-08-22)
+
+| Harness | Measured version | baseline | What is / isn't confirmed on the full tier |
+|---|---|---|---|
+| Claude Code | 2.1.239 | holds | `paths:`-scoped loading of `.claude/rules/*.md`, subagents, skills, `settings.json` hooks — all confirmed against the [official docs](https://code.claude.com/docs/en/memory.md) |
+| Codex | codex-cli 0.149.0 | holds | `AGENTS.md` auto-load and a P0-cited `.env` refusal were measured. **Skills are not discovered** (see below) |
+| Antigravity | agy **1.1.18** (not re-measured) | holds | On 1.1.17, **headless (`-p`) measurably did not load rules** — root cause unknown. Neither 1.1.18 nor interactive mode has been re-measured |
+
+Codex (codex-cli 0.149.0) auto-loads the `codex`-mode AGENTS.md, answered the rule tiers
+correctly, and **refused an instruction to commit a `.env`, citing the P0 rule** (first line of
+defense). If a model tries anyway, the git hook blocks it with exit 2 (second line, test-covered).
+
+**Known gap — Codex skills are not auto-discovered.** Codex discovers repository skills under
+`.agents/skills`, but `--harness codex` currently leaves them in `.claude/skills`. The rules layer
+(`AGENTS.md`) works; the skills layer does not — that is baseline, not full.
+
+Two further Codex constraints shape the design:
+
+- **Combined instructions are capped at 32KiB by default** (`project_doc_max_bytes`), which is why
+  only the selected stack's P0 is inlined into `AGENTS.md` (measured 6,869 B with `--stack javaweb`
+  — 21% of the cap).
+- **The `.codex/` layer only loads for a trusted project.** Emitting a file does not guarantee it is
+  active, which is why the deterministic enforcement line lives in `.git/hooks` + CI.
 
 ## Language (`--lang`)
 

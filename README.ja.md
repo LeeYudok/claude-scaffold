@@ -89,7 +89,7 @@ agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack 
     sdlc-tester.md        AC/TC テスト作成エージェント
     sdlc-verifier.md      パイプライン実行 + レポートエージェント
     agent-evolve.md       自己改善メタエージェント — 実行フィードバックから agents/*.md を洗練
-  commands/
+  commands/              （Claude Code ではレガシー — スラッシュコマンドは skills に統合）
     sonar.md             SonarQube 分析(CE タスクポーリング、sqp_/squ_ トークン処理)
     sdlc-cycle.md         5段階 SDLC 自動化
     knowledge-graph.md    .claude ナレッジグラフ再生成 + リンク切れチェック
@@ -114,18 +114,18 @@ agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack 
     review/                   code-reviewer + security-audit ラッパー
     memory-factcheck/         メモリのファクトチェック — 主張をコード/DB/イシューと照合し、古いものを修正
     security-precheck/        監査前セキュリティスイープ → イシュー化 → 並列修正
-  workflows/
+  workflows/             （自動ロードされない — 明示的に呼び出す）
     rules-audit.js           保存型 Workflow の例 — scan/verify/repair、マージは人間ゲート
-  scripts/
+  scripts/               （自動ロードされない — 明示的に呼び出す）
     knowledge_graph.py       .claude エコシステムグラフ + --check リンク切れゲート
   settings.json               フック配線 + デフォルト deny ルール
 AGENTS.md                 プロジェクトの頭脳 — ルール SSOT(P0/P1/P2 + ワークフロー)
-CLAUDE.md                 @AGENTS.md へのポインタ(Claude Code)
-GEMINI.md                 @AGENTS.md へのポインタ(Gemini CLI)
+CLAUDE.md                 @AGENTS.md + メモリインデックスの import (Claude Code)
+GEMINI.md                 @AGENTS.md + メモリインデックスの import (Gemini CLI)
 presets/                  プリセット断片(コピー上書きモデル)
   forge-github/           GitHub forge — gh、PR、`Closes #N` 自動クローズ
   forge-gitlab/           GitLab forge — glab、MR、`Closes #N` 自動クローズ(マージ後に確認)
-  nextjs/ bun/ ...        スタック別断片(rules + pre-commit.partial.sh)
+  nextjs/ bun/ ...        スタック別断片(rules + pre-commit.partial.sh + AGENTS.partial.md)
   lang-en/                英語オーバーレイ(base/forge-*/stacks/*)— 後述の `--lang` を参照
 bin/                      agents-scaffold.sh ブートストラップスクリプト
 tests/                    ブートストラップスクリプト用 bats リグレッションスイート
@@ -178,7 +178,22 @@ git フックは**ハーネスに関係なく常に配線されます**（#21）
 
 選択したスタックの P0 は **`AGENTS.md` 本文に直接挿入**されます。`.claude/rules/` の参照リンクに依存しないため、`.claude/` を読み込まないハーネスでも到達可能です。選択していないスタックは挿入されません（Codex の指示合計はデフォルト 32KiB 上限 — context flooding を防ぐため）。
 
-**実測検証（2026-08）**：Codex（codex-cli 0.149.0）は `codex` モード成果物の AGENTS.md を自動で読み込み、ルール階層を正しく回答し、`.env` をコミットせよという指示を **P0 ルールを根拠に自ら拒否**しました（第一の防衛線）。モデルが強行しても git フックが exit 2 でブロックします（第二の防衛線、テスト済み）。Antigravity（agy 1.1.17）はドキュメント上 `AGENTS.md`/`.agents/rules/` をサポートすると記載していますが、**headless（`-p`）モードではルールを読み込まないことを実測** — インタラクティブモードは未検証のため、Antigravity 対応は保証しません。
+### 実測検証（2026-08-22）
+
+| ハーネス | 実測バージョン | baseline | full 層で確認できたこと / できていないこと |
+|---|---|---|---|
+| Claude Code | 2.1.239 | 成立 | `.claude/rules/*.md` の `paths:` 条件付きロード、サブエージェント、skills、`settings.json` フック — いずれも[公式ドキュメント](https://code.claude.com/docs/en/memory.md)で確認 |
+| Codex | codex-cli 0.149.0 | 成立 | `AGENTS.md` の自動ロードと P0 を根拠にした `.env` 拒否を実測。**skills は発見されない**（下記） |
+| Antigravity | agy **1.1.18**（再測定なし） | 成立 | 1.1.17 で **headless（`-p`）がルールを読み込まない**ことを実測 — 原因は未解明。1.1.18 もインタラクティブモードも未検証 |
+
+Codex（codex-cli 0.149.0）は `codex` モード成果物の AGENTS.md を自動で読み込み、ルール階層を正しく回答し、`.env` をコミットせよという指示を **P0 ルールを根拠に自ら拒否**しました（第一の防衛線）。モデルが強行しても git フックが exit 2 でブロックします（第二の防衛線、テスト済み）。
+
+**既知のギャップ — Codex の skills は自動発見されません。** Codex がリポジトリの skills を探す場所は `.agents/skills` ですが、現在の `--harness codex` は `.claude/skills` に残します。ルール層（`AGENTS.md`）は機能しますが skills 層は機能しません — これは full ではなく baseline です。
+
+Codex 側の制約がもう 2 点、設計に効いてきます。
+
+- **指示の合計はデフォルト 32KiB 上限**（`project_doc_max_bytes`）。そのため選択したスタックの P0 のみを `AGENTS.md` にインライン化します（`--stack javaweb` で実測 6,869 B — 上限の 21%）。
+- **`.codex/` レイヤは信頼済みプロジェクトでのみロードされます。** ファイルを生成しても有効化は保証されません。だからこそ決定的な強制線は `.git/hooks` + CI に置きます。
 
 ## 言語 (`--lang`)
 

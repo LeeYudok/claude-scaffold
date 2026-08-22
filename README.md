@@ -85,7 +85,7 @@ placeholder 를 채우고 안 쓰는 걸 지우면, 결과는 레포의 다른 �
     sdlc-tester.md      AC/TC 테스트 작성 에이전트
     sdlc-verifier.md    파이프라인 실행·리포트 에이전트
     agent-evolve.md     자기개선 메타 에이전트 — 실행 피드백으로 agents/*.md 자동 개선
-  commands/
+  commands/            (Claude Code 에서는 레거시 — 슬래시 커맨드가 skills 로 통합됨)
     sonar.md            SonarQube 분석 (CE task 폴링, sqp_/squ_ 구분)
     sdlc-cycle.md       5단계 SDLC 자동화
     knowledge-graph.md  .claude 지식 그래프 재생성 + 깨진 링크 체크
@@ -110,18 +110,18 @@ placeholder 를 채우고 안 쓰는 걸 지우면, 결과는 레포의 다른 �
     review/             code-reviewer + security-audit 래퍼
     memory-factcheck/   메모리 사실 검증 — 코드·DB·이슈 대조로 stale 정정
     security-precheck/  감사 대비 보안 사전점검 → 이슈 → 병렬 수정
-  workflows/
+  workflows/            (자동 로드 아님 — 명시 호출로만 실행)
     rules-audit.js      저장형 Workflow 예제 — 스캔/검증/수정, 머지는 사람 게이트
-  scripts/
+  scripts/              (자동 로드 아님 — 명시 호출로만 실행)
     knowledge_graph.py  .claude 생태계 그래프 + --check 깨진 링크 게이트
   settings.json         hooks 와이어링 + deny 기본값
 AGENTS.md               프로젝트 브레인 — 규칙 SSOT (P0/P1/P2 + 워크플로)
-CLAUDE.md               @AGENTS.md 포인터 (Claude Code)
-GEMINI.md               @AGENTS.md 포인터 (Gemini CLI)
+CLAUDE.md               @AGENTS.md + 메모리 인덱스 import (Claude Code)
+GEMINI.md               @AGENTS.md + 메모리 인덱스 import (Gemini CLI)
 presets/                프리셋 조각 (복사 덮어쓰기 방식)
   forge-github/         GitHub forge — gh, PR, `Closes #N` 자동 클로즈
   forge-gitlab/         GitLab forge — glab, MR, `Closes #N` 자동 클로즈(머지 후 확인)
-  nextjs/ bun/ ...      스택별 조각 (rules + pre-commit.partial.sh)
+  nextjs/ bun/ ...      스택별 조각 (rules + pre-commit.partial.sh + AGENTS.partial.md)
   lang-en/              영어 오버레이 (base/forge-*/stacks/*) — 아래 `--lang` 참조
 bin/                    agents-scaffold.sh 부트스트랩 스크립트
 ```
@@ -175,7 +175,28 @@ Bash 툴로 커밋할 때만 발동하므로 조기 피드백 계층이지 강�
 않으므로 `.claude/` 를 로드하지 않는 하네스에서도 도달 가능하다. 선택하지 않은 스택은 삽입되지
 않는다(Codex instruction 합산 기본 한도 32KiB — context flooding 방지).
 
-**실측 검증 (2026-08)**: Codex(codex-cli 0.149.0)는 `codex` 모드 산출물의 AGENTS.md 를 자동 로드해 룰 티어를 정확히 답했고, `.env` 커밋 지시를 **P0 규칙을 근거로 스스로 거부**했다(1차 방어). 모델이 시도하더라도 git hook 이 exit 2 로 차단한다(2차 방어, 테스트 커버). Antigravity(agy 1.1.17)는 내장 문서상 `AGENTS.md`/`.agents/rules/` 를 지원하나 **headless(`-p`) 모드에서 규칙 미로드가 실측**됐다 — 인터랙티브 모드는 미검증이므로 지원을 보장하지 않는다.
+### 실측 검증 (2026-08-22)
+
+| 하네스 | 실측 버전 | baseline | full 쪽 확인된 것 / 확인 안 된 것 |
+|---|---|---|---|
+| Claude Code | 2.1.239 | 성립 | `.claude/rules/*.md` 의 `paths:` 조건부 로딩, 서브에이전트, skills, `settings.json` 훅 — 전부 [공식 문서](https://code.claude.com/docs/en/memory.md)로 확인 |
+| Codex | codex-cli 0.149.0 | 성립 | `AGENTS.md` 자동 로드·P0 근거 `.env` 거부까지 실측. **스킬은 발견되지 않는다**(아래) |
+| Antigravity | agy **1.1.18** (미재검증) | 성립 | 1.1.17 에서 **headless(`-p`) 규칙 미로드** 실측 — 원인 미규명. 1.1.18 재검증·인터랙티브 모드 모두 미실시 |
+
+Codex(codex-cli 0.149.0)는 `codex` 모드 산출물의 AGENTS.md 를 자동 로드해 룰 티어를 정확히
+답했고, `.env` 커밋 지시를 **P0 규칙을 근거로 스스로 거부**했다(1차 방어). 모델이 시도해도
+git hook 이 exit 2 로 차단한다(2차 방어, 테스트 커버).
+
+**알려진 갭 — Codex 스킬은 자동 발견되지 않는다.** Codex 의 저장소 스킬 발견 경로는
+`.agents/skills` 인데 현재 `--harness codex` 는 `.claude/skills` 를 남긴다. 규칙 계층
+(`AGENTS.md`)은 동작하지만 스킬은 그렇지 않다 — full 이 아니라 baseline 이다.
+
+Codex 쪽 추가 제약 두 가지도 설계에 영향을 준다.
+
+- **instruction 합산 기본 한도 32KiB** (`project_doc_max_bytes`). 그래서 스택 P0 는 선택한
+  스택만 `AGENTS.md` 에 인라인한다 (`--stack javaweb` 기준 실측 6,869 B — 한도의 21%).
+- **`.codex/` 레이어는 프로젝트를 신뢰한 경우에만 로드된다.** 파일을 생성했다고 활성화가
+  보장되지 않는다. 그래서 결정적 강제선을 `.git/hooks` + CI 에 둔다.
 
 ## 언어 (`--lang`)
 
