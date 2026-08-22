@@ -17,5 +17,5 @@ jobs:
       - name: Run python unit tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
-      - name: Run claude-scaffold.sh bats tests
-        run: bats tests/claude-scaffold.bats
+      - name: Run agents-scaffold.sh bats tests
+        run: bats tests/agents-scaffold.bats

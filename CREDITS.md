@@ -1,6 +1,6 @@
 # Credits — third-party origins
 
-claude-scaffold bundles or adapts work from the following open-source projects.
+agents-scaffold bundles or adapts work from the following open-source projects.
 Thank you to their authors.
 
 | What in this repo | Upstream | License |

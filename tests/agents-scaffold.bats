@@ -1,17 +1,17 @@
 #!/usr/bin/env bats
-# claude-scaffold.sh 회귀 테스트 (이슈 #12)
+# agents-scaffold.sh 회귀 테스트 (이슈 #12)
 #
-# 실행: bats tests/claude-scaffold.bats
+# 실행: bats tests/agents-scaffold.bats
 # 로컬 설치: brew install bats-core (또는 https://github.com/bats-core/bats-core)
 #
-# 각 테스트는 REPO_ROOT/bin/claude-scaffold.sh 를 BATS_TEST_TMPDIR 안의
+# 각 테스트는 REPO_ROOT/bin/agents-scaffold.sh 를 BATS_TEST_TMPDIR 안의
 # 격리된 타겟에 대해 실행한다. 원본 레포는 절대 건드리지 않는다
 # (in-place self-clean 테스트만 예외 — 반드시 레포를 임시 복사한 사본을 대상으로 함).
 #
-# ⚠️ 알려진 환경 이슈 (이슈 #12 조사 중 발견, bin/claude-scaffold.sh 는 수정하지 않음
+# ⚠️ 알려진 환경 이슈 (이슈 #12 조사 중 발견, bin/agents-scaffold.sh 는 수정하지 않음
 #    — #10/#13 병렬 작업 범위): macOS 기본 시스템 bash(/bin/bash, 3.2, set -u 하에서
 #    "IFS=',' read -a arr <<< \"\"" 로 만든 빈 배열 참조 시 "unbound variable" 로 죽는
-#    구버전 버그 있음) 로 bin/claude-scaffold.sh 를 실행하면 --stack 을 지정하지 않은
+#    구버전 버그 있음) 로 bin/agents-scaffold.sh 를 실행하면 --stack 을 지정하지 않은
 #    호출(예: base copy 전용 실행)이 90번째 줄 `for s in "${STACK_ARR[@]}"` 에서
 #    실패한다. bash>=4 (CI ubuntu 기본, 또는 `brew install bash` 후 PATH 우선순위 조정)
 #    에서는 재현되지 않는다. 이 테스트 스위트는 CI/최신 bash 기준으로 통과하도록
@@ -20,7 +20,7 @@
 
 setup() {
   REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
-  SCRIPT="$REPO_ROOT/bin/claude-scaffold.sh"
+  SCRIPT="$REPO_ROOT/bin/agents-scaffold.sh"
 }
 
 # --- 1) 베이스 복사 ---
@@ -162,7 +162,7 @@ EOF
   cp -R "$REPO_ROOT" "$copy"
 
   # 원본 레포는 훼손되지 않아야 하므로 사본 경로로만 실행
-  run "$copy/bin/claude-scaffold.sh" "$copy" --yes
+  run "$copy/bin/agents-scaffold.sh" "$copy" --yes
   [ "$status" -eq 0 ]
 
   [ ! -d "$copy/bin" ]
@@ -199,7 +199,7 @@ EOF
 
   target="$BATS_TEST_TMPDIR/lang-en-target"
   mkdir -p "$target"
-  run "$copy/bin/claude-scaffold.sh" "$target" --lang en --yes
+  run "$copy/bin/agents-scaffold.sh" "$target" --lang en --yes
   [ "$status" -eq 0 ]
 
   [ -f "$target/.claude/rules/common.md" ]
@@ -215,7 +215,7 @@ EOF
 
   target="$BATS_TEST_TMPDIR/lang-default-target"
   mkdir -p "$target"
-  run "$copy/bin/claude-scaffold.sh" "$target" --yes
+  run "$copy/bin/agents-scaffold.sh" "$target" --yes
   [ "$status" -eq 0 ]
 
   [ -f "$target/.claude/rules/common.md" ]
@@ -461,7 +461,7 @@ setup_publish_repo() {
 
   target="$BATS_TEST_TMPDIR/pyc-target"
   mkdir -p "$target"
-  run "$copy/bin/claude-scaffold.sh" "$target" --yes
+  run "$copy/bin/agents-scaffold.sh" "$target" --yes
   [ "$status" -eq 0 ]
   grep -q 'pyc-target' "$target/AGENTS.md"
   # untracked 바이너리는 아예 복사되지 않아야 한다(#39 git ls-files 기반 복사)

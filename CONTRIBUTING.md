@@ -1,12 +1,12 @@
-# Contributing to claude-scaffold
+# Contributing to agents-scaffold
 
-Thanks for considering a contribution! claude-scaffold is a minimal `.claude/`
+Thanks for considering a contribution! agents-scaffold is a minimal `.claude/`
 bootstrap template, not a running application — most contributions are Markdown
 (rules, agent/skill definitions) and small shell scripts (hooks,
-`bin/claude-scaffold.sh`, `presets/*/.claude/hooks/pre-commit.partial.sh`).
+`bin/agents-scaffold.sh`, `presets/*/.claude/hooks/pre-commit.partial.sh`).
 The easiest way to make a first contribution is a **new stack preset** — see
 the section below and the issues labeled
-[`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+[`good first issue`](https://github.com/LeeYudok/agents-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
 
 ## Workflow (GitHub)
 
@@ -21,7 +21,7 @@ the section below and the issues labeled
 
    ```bash
    # bats (bootstrap script + presets); install: https://bats-core.readthedocs.io
-   bats tests/claude-scaffold.bats
+   bats tests/agents-scaffold.bats
 
    # python unit tests (hook/link-checker helpers)
    python3 -m unittest discover -s tests
@@ -30,7 +30,7 @@ the section below and the issues labeled
    The same suite runs in CI on every PR — a green run is required to merge.
 5. **Pull request** against `main` with `Closes #<N>` in the description.
    Merging auto-closes the issue.
-6. **Review.** Changes to `bin/claude-scaffold.sh`, `.claude/hooks/pre-commit.sh`,
+6. **Review.** Changes to `bin/agents-scaffold.sh`, `.claude/hooks/pre-commit.sh`,
    or any `pre-commit.partial.sh` get extra scrutiny — these are load-bearing
    for every repo that bootstraps from this template.
 
@@ -41,13 +41,13 @@ the section below and the issues labeled
   `GEMINI.md`): applies to every consuming repo regardless of stack. Changes
   here have the widest blast radius — keep them stack-agnostic.
 - **Stack presets** (`presets/<stack>/`): opt-in, applied only when a repo
-  selects that stack via `bin/claude-scaffold.sh --stack <name>`. See
+  selects that stack via `bin/agents-scaffold.sh --stack <name>`. See
   [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) for the required layout.
 - **English overlay** (`presets/lang-en/`): the English mirror of the Korean
   originals. If you change a Korean rule/agent/skill, mirror the change in
   `presets/lang-en/` in the same PR (and vice versa). Executable scripts are
   written in English once and shared — do not duplicate them into the overlay.
-- **Bootstrap script** (`bin/claude-scaffold.sh`): the only piece of logic that
+- **Bootstrap script** (`bin/agents-scaffold.sh`): the only piece of logic that
   copies files, applies presets, and substitutes placeholders. Changes here
   affect every mode of consumption — test them with the bats suite.
 
@@ -65,7 +65,7 @@ the section below and the issues labeled
 3. Add the English rule file at `presets/lang-en/stacks/<stack>/.claude/rules/<stack>.md`.
 4. Add a row to the stack preset table in `README.md` and `README.en.md`
    (rule file + pre-commit gate description).
-5. Bootstrap a scratch repo with `bin/claude-scaffold.sh /tmp/scratch --stack
+5. Bootstrap a scratch repo with `bin/agents-scaffold.sh /tmp/scratch --stack
    <your-stack> --name scratch` and confirm:
    - the rule file lands at `.claude/rules/<stack>.md` with correct
      frontmatter `paths:`,

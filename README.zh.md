@@ -1,8 +1,8 @@
-# claude-scaffold
+# agents-scaffold
 
 [한국어](README.md) | [English](README.en.md) | 简体中文 | [日本語](README.ja.md)
 
-[![tests](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml)
+[![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **这不是一个框架，而是一套极简的、fork 后按需填充的 Claude Code 引导脚手架**，
@@ -17,11 +17,11 @@ _30 秒演示：一条命令 → 填充完毕的 `.claude/` → 门禁拦截了�
 
 ```bash
 # 一条命令，无需 clone
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 
 # 或从本地克隆运行（省略选项时会进入交互式提问）
-git clone https://github.com/leeyudok/claude-scaffold.git
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+git clone https://github.com/leeyudok/agents-scaffold.git
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 你将得到一个填充完毕的 `.claude/` 目录（agents、skills、hooks、按路径作用域加载的
@@ -58,9 +58,9 @@ prompt 编写也没关系：
 - **团队/多会话安全**：默认按会话隔离 git worktree，并行工作互不
   踩踏。
 
-## 为什么选择 claude-scaffold
+## 为什么选择 agents-scaffold
 
-与大型可安装框架或 agent/skill 目录不同，claude-scaffold 不附带运行时、
+与大型可安装框架或 agent/skill 目录不同，agents-scaffold 不附带运行时、
 不带插件系统、也没有需要保持同步的中心化 registry——它只是一个 `.claude/`
 目录骨架加上几个技术栈预设，复制进仓库一次之后就完全归你所有。日后没有
 任何东西需要升级：fork 它、填好占位符、删掉不需要的部分，最终得到的就是
@@ -124,7 +124,7 @@ presets/                  预设片段（复制覆盖模型）
   forge-gitlab/           GitLab forge —— glab、MR、`Closes #N` 自动关闭（合并后需确认）
   nextjs/ bun/ ...        各技术栈片段（规则 + pre-commit.partial.sh）
   lang-en/                英文覆盖层（base/forge-*/stacks/*）—— 见下文 `--lang`
-bin/                      claude-scaffold.sh 引导脚本
+bin/                      agents-scaffold.sh 引导脚本
 tests/                    引导脚本的 bats 回归测试套件
 ```
 
@@ -166,7 +166,7 @@ tests/                    引导脚本的 bats 回归测试套件
 覆盖同名文件。
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
 ```
 
 `.claude/hooks/pre-commit.sh` 永远不会被 `--lang` 覆盖（它是技术栈片段
@@ -177,9 +177,9 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge githu
 ## Usage 1 — 脚本
 
 ```bash
-git clone https://github.com/leeyudok/claude-scaffold.git
+git clone https://github.com/leeyudok/agents-scaffold.git
 # --forge 默认为 github；GitLab 仓库请用 --forge gitlab
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 省略 `--forge`/`--stack`/`--name` 即进入交互模式——脚本会依次询问
@@ -200,13 +200,13 @@ claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack 
 ### 远程一键安装（无需 clone）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 ```
 
 当脚本检测到自己并非从本地检出运行时（例如管道执行），会将
-`CLAUDE_SCAFFOLD_REPO` 的 tarball（默认：
-`github.com/leeyudok/claude-scaffold`，可通过环境变量覆盖）下载到临时目录，
-并将其作为模板来源。用 `CLAUDE_SCAFFOLD_REF` 固定分支/标签
+`AGENTS_SCAFFOLD_REPO` 的 tarball（默认：
+`github.com/leeyudok/agents-scaffold`，可通过环境变量覆盖）下载到临时目录，
+并将其作为模板来源。用 `AGENTS_SCAFFOLD_REF` 固定分支/标签
 （默认 `main`）。
 
 ### 更新基础文件 — `--update`
@@ -215,7 +215,7 @@ curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/c
 `GEMINI.md`）应用到已完成引导的项目。
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
+agents-scaffold/bin/agents-scaffold.sh --update /path/to/existing-repo
 ```
 
 - `.claude/hooks/pre-commit.sh` 始终被跳过——技术栈片段已被拼接
@@ -232,8 +232,8 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 > 注意：该工作流假定使用自托管 GitLab 实例。在 **GitLab CE** 上，
 > 原生的自定义项目模板属于 Premium 功能、不可用——
-> 请改用 **Import by URL + `bin/claude-scaffold.sh`** 或**仅用脚本**。
-> 创建/导入后运行一次 `bin/claude-scaffold.sh .`，即可应用所选
+> 请改用 **Import by URL + `bin/agents-scaffold.sh`** 或**仅用脚本**。
+> 创建/导入后运行一次 `bin/agents-scaffold.sh .`，即可应用所选
 > 技术栈、替换占位符，并自清理 `bin/`/`presets/`/`docs/superpowers/`。
 
 ## 占位符替换
@@ -256,7 +256,7 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 工作流见 [CONTRIBUTING.md](CONTRIBUTING.md)，
 技术栈预设格式见 [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md)。
-初来乍到？从 [`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 开始——
+初来乍到？从 [`good first issue`](https://github.com/LeeYudok/agents-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 开始——
 新增一个技术栈预设是最容易上手的任务，因为其结构已完全模板化。
 
 ## License

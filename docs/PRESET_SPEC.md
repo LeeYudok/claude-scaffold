@@ -1,6 +1,6 @@
 # 스택 프리셋 명세
 
-이 문서는 `bin/claude-scaffold.sh` 가 소비하는 `presets/<stack>/` 하위 스택 프리셋의
+이 문서는 `bin/agents-scaffold.sh` 가 소비하는 `presets/<stack>/` 하위 스택 프리셋의
 필수 레이아웃과 동작을 정의한다. 신규 프리셋을 추가하거나 기존 프리셋을 감사하는
 사람을 위한 레퍼런스이며 — 여기를 가리키는 기여 워크플로는 `CONTRIBUTING.md` 참조.
 
@@ -53,7 +53,7 @@ presets/<stack>/
 
 ## `pre-commit.partial.sh` 계약
 
-`bin/claude-scaffold.sh` 는 선택된 각 스택의 파셜을 대상의
+`bin/agents-scaffold.sh` 는 선택된 각 스택의 파셜을 대상의
 `.claude/hooks/pre-commit.sh` 안 `# --- STACK CHECKS` 마커 줄 바로 뒤에,
 `--stack` 에 전달된 순서대로 삽입한다. 여러 파셜은 하나의 파일 안에 이어
 붙어서, 베이스 스크립트의 끝부분 `echo "pre-commit 통과"; exit 0` 이전까지
@@ -114,7 +114,7 @@ presets/<stack>/
 | `{{PROJECT_NAME}}` | `--name` 값, 또는 대상 디렉터리의 basename |
 | `{{JAVA_VERSION}}` | `1.8`(현재 유일한 스택 고유 플레이스홀더, `springboot` 가 사용) |
 
-새 프리셋에 스택 고유 플레이스홀더가 필요하면 `bin/claude-scaffold.sh` 3단계의
+새 프리셋에 스택 고유 플레이스홀더가 필요하면 `bin/agents-scaffold.sh` 3단계의
 `sed` 호출에 치환을 추가하고, 여기와 `README.md` 의 플레이스홀더 표에도
 문서화한다 — 스크립트가 채울 방법을 모르는 임의 토큰을 만들지 말 것.
 
@@ -169,7 +169,7 @@ presets/lang-en/
 - [ ] `presets/<stack>/.claude/rules/<stack>.md` 의 영어 대응물로
       `presets/lang-en/stacks/<stack>/.claude/rules/<stack>.md` 가
       추가됐다.
-- [ ] `bin/claude-scaffold.sh <dir> --stack <stack> --name scratch` 로 스크래치
+- [ ] `bin/agents-scaffold.sh <dir> --stack <stack> --name scratch` 로 스크래치
       레포를 부트스트랩해 다음을 확인했다:
   - 룰 파일이 플레이스홀더가 치환된 채로 `.claude/rules/<stack>.md` 에
     안착한다,

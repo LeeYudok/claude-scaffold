@@ -1,8 +1,8 @@
-# claude-scaffold
+# agents-scaffold
 
 [한국어](README.md) | English | [简体中文](README.zh.md) | [日本語](README.ja.md)
 
-[![tests](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/claude-scaffold/actions/workflows/test.yml)
+[![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Not a framework — a minimal, fork-and-fill bootstrap for Claude Code** with
@@ -17,11 +17,11 @@ _30-second demo: one command → a filled `.claude/` → the gate blocks a secre
 
 ```bash
 # one command, no clone required
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 
 # or from a local clone (prompts interactively when options are omitted)
-git clone https://github.com/leeyudok/claude-scaffold.git
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+git clone https://github.com/leeyudok/agents-scaffold.git
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 You get a filled-in `.claude/` directory (agents, skills, hooks, paths-scoped
@@ -59,9 +59,9 @@ you're new to prompting:
 - **Team/multi-session safe**: per-session git worktree isolation is the default, so
   parallel work never tramples each other.
 
-## Why claude-scaffold
+## Why agents-scaffold
 
-Unlike large installable frameworks or agent/skill catalogs, claude-scaffold ships
+Unlike large installable frameworks or agent/skill catalogs, agents-scaffold ships
 no runtime, no plugin system, and no central registry to keep in sync — it is
 a `.claude/` directory skeleton plus a handful of stack presets that you copy
 into a repo once and then own outright. There is nothing to upgrade later:
@@ -126,7 +126,7 @@ presets/                  preset fragments (copy-overwrite model)
   forge-gitlab/           GitLab forge — glab, MRs, `Closes #N` auto-close (verify after merge)
   nextjs/ bun/ ...        per-stack fragments (rules + pre-commit.partial.sh)
   lang-en/                English overlay (base/forge-*/stacks/*) — see `--lang` below
-bin/                      claude-scaffold.sh bootstrap script
+bin/                      agents-scaffold.sh bootstrap script
 tests/                    bats regression suite for the bootstrap script
 ```
 
@@ -168,7 +168,7 @@ stack presets — so it overrides the same files with `presets/lang-en/base` +
 `presets/lang-en/forge-<forge>` + `presets/lang-en/stacks/<stack>` content.
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --lang en --forge github --stack bun
 ```
 
 `.claude/hooks/pre-commit.sh` is never overlaid by `--lang` (it's the file
@@ -179,9 +179,9 @@ by language). `--update` only refreshes the Korean base; re-run with
 ## Usage 1 — script
 
 ```bash
-git clone https://github.com/leeyudok/claude-scaffold.git
+git clone https://github.com/leeyudok/agents-scaffold.git
 # --forge defaults to github; use --forge gitlab for GitLab repos
-claude-scaffold/bin/claude-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
+agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack nextjs,bun --name my-app
 ```
 
 Omit `--forge`/`--stack`/`--name` to run interactively — the script will prompt
@@ -202,13 +202,13 @@ Omit `--forge`/`--stack`/`--name` to run interactively — the script will promp
 ### Remote one-command install (no clone)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- --stack nextjs --yes
+curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- --stack nextjs --yes
 ```
 
 When the script detects it is not running from a local checkout (e.g. piped
-execution), it downloads the `CLAUDE_SCAFFOLD_REPO` tarball (default:
-`github.com/leeyudok/claude-scaffold`, override via env) into a temporary directory and
-uses it as the template source. Pin a branch/tag with `CLAUDE_SCAFFOLD_REF`
+execution), it downloads the `AGENTS_SCAFFOLD_REPO` tarball (default:
+`github.com/leeyudok/agents-scaffold`, override via env) into a temporary directory and
+uses it as the template source. Pin a branch/tag with `AGENTS_SCAFFOLD_REF`
 (default `main`).
 
 ### Updating the base — `--update`
@@ -217,7 +217,7 @@ Applies the latest base files (`.claude/`, `AGENTS.md`, `CLAUDE.md`,
 `GEMINI.md`) to an already-bootstrapped project.
 
 ```bash
-claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
+agents-scaffold/bin/agents-scaffold.sh --update /path/to/existing-repo
 ```
 
 - `.claude/hooks/pre-commit.sh` is always skipped — stack partials were spliced
@@ -235,8 +235,8 @@ see **[docs/GITLAB_TEMPLATE.md](docs/GITLAB_TEMPLATE.md)**.
 
 > Note: this workflow assumes a self-hosted GitLab instance. On **GitLab CE**,
 > native custom project templates are a Premium feature and unavailable —
-> use **Import by URL + `bin/claude-scaffold.sh`** or **the script alone** instead.
-> After creating/importing, run `bin/claude-scaffold.sh .` once to apply the
+> use **Import by URL + `bin/agents-scaffold.sh`** or **the script alone** instead.
+> After creating/importing, run `bin/agents-scaffold.sh .` once to apply the
 > chosen stacks, substitute placeholders, and self-clean `bin/`/`presets/`/`docs/superpowers/`.
 
 ## Placeholder substitution
@@ -259,7 +259,7 @@ see **[docs/GITLAB_TEMPLATE.md](docs/GITLAB_TEMPLATE.md)**.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
 [docs/PRESET_SPEC.md](docs/PRESET_SPEC.md) for the stack preset format.
-New here? Start with a [`good first issue`](https://github.com/LeeYudok/claude-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) —
+New here? Start with a [`good first issue`](https://github.com/LeeYudok/agents-scaffold/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) —
 adding a new stack preset is the most approachable one, since the layout is fully templated.
 
 ## License

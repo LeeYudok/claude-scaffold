@@ -1,11 +1,11 @@
-# claude-scaffold 템플릿 — 설계 (2026-06-30, 이슈 #1)
+# agents-scaffold 템플릿 — 설계 (2026-06-30, 이슈 #1)
 
 ## 목적
 
-새 레포를 만들 때마다 `.claude/` 협업 구성을 손으로 다시 짜지 않도록, **부트스트랩 템플릿**을 한 곳(`<group>/claude-scaffold`)에 둔다. 두 경로로 소비한다:
+새 레포를 만들 때마다 `.claude/` 협업 구성을 손으로 다시 짜지 않도록, **부트스트랩 템플릿**을 한 곳(`<group>/agents-scaffold`)에 둔다. 두 경로로 소비한다:
 
-1. **스크립트** — `bin/claude-scaffold.sh <target-dir>` 실행 → 베이스 + 선택 스택 프리셋 복사 + 플레이스홀더 치환.
-2. **GitLab 프로젝트 템플릿** — 그룹 템플릿으로 등록 → "Create from template" → 생성 후 `bin/claude-scaffold.sh` 1회 실행으로 마무리(스택 적용·치환·self-clean).
+1. **스크립트** — `bin/agents-scaffold.sh <target-dir>` 실행 → 베이스 + 선택 스택 프리셋 복사 + 플레이스홀더 치환.
+2. **GitLab 프로젝트 템플릿** — 그룹 템플릿으로 등록 → "Create from template" → 생성 후 `bin/agents-scaffold.sh` 1회 실행으로 마무리(스택 적용·치환·self-clean).
 
 ## 비목표 (YAGNI)
 
@@ -16,10 +16,10 @@
 ## 레이아웃
 
 ```
-claude-scaffold/
+agents-scaffold/
 ├── README.md                      # 용도·사용법(스크립트/템플릿 두 경로)
 ├── bin/
-│   └── claude-scaffold.sh             # 부트스트랩 엔트리
+│   └── agents-scaffold.sh             # 부트스트랩 엔트리
 ├── presets/                       # 스택별 조각(스크립트가 선택 복사)
 │   ├── nextjs/
 │   │   └── .claude/rules/nextjs.md         # paths: app/**,components/**
@@ -40,14 +40,14 @@ claude-scaffold/
 
 ## 컴포넌트 사양
 
-### bin/claude-scaffold.sh
+### bin/agents-scaffold.sh
 - 인자: `<target-dir>`(기본 `.`), 옵션 `--stack nextjs,springboot`(미지정 시 대화형 프롬프트), `--name <project>`.
 - 동작:
   1. 베이스 `.claude/` + `CLAUDE.md`를 target에 복사(기존 파일 있으면 덮어쓰기 전 확인).
   2. 선택 스택별 `presets/<stack>/` 내용을 target에 머지(rule 추가, `pre-commit.partial.sh`는 `.claude/hooks/pre-commit.sh`에 append).
   3. 플레이스홀더 치환: `{{PROJECT_NAME}}`(→ --name 또는 target 디렉터리명), `{{JAVA_VERSION}}`(springboot 선택 시 `1.8`).
   4. `.sh` 실행권한 부여.
-  5. **self-clean**: target이 곧 claude-scaffold 자신일 때(GitLab 템플릿 경로)면 `bin/`·`presets/`·`docs/superpowers/`를 제거하고 자기 자신도 정리.
+  5. **self-clean**: target이 곧 agents-scaffold 자신일 때(GitLab 템플릿 경로)면 `bin/`·`presets/`·`docs/superpowers/`를 제거하고 자기 자신도 정리.
 - 순수 bash + 표준 유틸(cp/sed/find)만. 외부 의존 없음.
 
 ### .claude/settings.json (베이스, 실동작)
@@ -81,6 +81,6 @@ claude-scaffold/
 
 ## 검증
 
-- `bin/claude-scaffold.sh`를 빈 임시 디렉터리에 실행 → `.claude/` 구조·치환·실행권한 확인.
+- `bin/agents-scaffold.sh`를 빈 임시 디렉터리에 실행 → `.claude/` 구조·치환·실행권한 확인.
 - nextjs/springboot 각각 선택 시 해당 rule이 들어오고 paths frontmatter 유효(YAML) 확인.
 - settings.json JSON 유효성, rule md frontmatter 파싱 가능 확인.

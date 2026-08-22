@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# claude-scaffold — .claude/ 부트스트랩.
+# agents-scaffold — .claude/ 부트스트랩.
 # P2 300줄 규칙 예외(#37): curl|bash 원커맨드 설치가 단일 파일을 요구해 분리하지 않는다.
 set -euo pipefail
 
 print_help() {
   cat <<'EOF'
 Usage:
-  bin/claude-scaffold.sh [<target-dir>] [--forge github|gitlab] [--stack nextjs,springboot] [--lang en|ko] [--name <project>] [--yes]
-  bin/claude-scaffold.sh --update [<target-dir>] [--name <project>]
-  curl -fsSL https://raw.githubusercontent.com/leeyudok/claude-scaffold/main/bin/claude-scaffold.sh | bash -s -- [--stack nextjs] [--name <project>] [--yes]
+  bin/agents-scaffold.sh [<target-dir>] [--forge github|gitlab] [--stack nextjs,springboot] [--lang en|ko] [--name <project>] [--yes]
+  bin/agents-scaffold.sh --update [<target-dir>] [--name <project>]
+  curl -fsSL https://raw.githubusercontent.com/leeyudok/agents-scaffold/main/bin/agents-scaffold.sh | bash -s -- [--stack nextjs] [--name <project>] [--yes]
 
   <target-dir>   Default "." (current directory). In-place (=repo itself) for the GitLab template path.
   --forge        Issue/PR forge. github (default) or gitlab. Interactive prompt if unset (default github).
@@ -27,10 +27,10 @@ Usage:
                  A summary of added/updated/skipped files is printed at the end.
 
 Remote install (no clone): if the local BASH_SOURCE-relative path is not a valid template
-root (e.g. running via curl pipe), a $CLAUDE_SCAFFOLD_REPO tarball is downloaded to a temp
+root (e.g. running via curl pipe), a $AGENTS_SCAFFOLD_REPO tarball is downloaded to a temp
 directory and used as the template source.
-  CLAUDE_SCAFFOLD_REPO  Defaults to the official GitHub repo URL (override via env).
-  CLAUDE_SCAFFOLD_REF   Branch/tag. Default "main".
+  AGENTS_SCAFFOLD_REPO  Defaults to the official GitHub repo URL (override via env).
+  AGENTS_SCAFFOLD_REF   Branch/tag. Default "main".
 
 Flow: copy base (.claude/ + CLAUDE.md) -> merge forge preset -> merge selected stack presets
       -> merge lang-en overlay (if --lang en) -> substitute {{PLACEHOLDER}} -> chmod +x
@@ -39,9 +39,9 @@ EOF
 }
 
 # 이슈 #10/#21: 원격 설치 기본 소스 레포
-CLAUDE_SCAFFOLD_REPO_OWNER_DEFAULT="leeyudok"
-CLAUDE_SCAFFOLD_REPO="${CLAUDE_SCAFFOLD_REPO:-https://github.com/${CLAUDE_SCAFFOLD_REPO_OWNER_DEFAULT}/claude-scaffold}"
-CLAUDE_SCAFFOLD_REF="${CLAUDE_SCAFFOLD_REF:-main}"
+AGENTS_SCAFFOLD_REPO_OWNER_DEFAULT="leeyudok"
+AGENTS_SCAFFOLD_REPO="${AGENTS_SCAFFOLD_REPO:-https://github.com/${AGENTS_SCAFFOLD_REPO_OWNER_DEFAULT}/agents-scaffold}"
+AGENTS_SCAFFOLD_REF="${AGENTS_SCAFFOLD_REF:-main}"
 
 TARGET="."
 STACKS=""
@@ -82,11 +82,11 @@ trap cleanup_remote_tmpdir EXIT
 
 fetch_remote_src() {
   REMOTE_TMPDIR="$(mktemp -d)"
-  local tarball="$REMOTE_TMPDIR/claude-scaffold.tar.gz"
-  local url="${CLAUDE_SCAFFOLD_REPO}/archive/refs/heads/${CLAUDE_SCAFFOLD_REF}.tar.gz"
+  local tarball="$REMOTE_TMPDIR/agents-scaffold.tar.gz"
+  local url="${AGENTS_SCAFFOLD_REPO}/archive/refs/heads/${AGENTS_SCAFFOLD_REF}.tar.gz"
   echo "== Local template not found — remote install: downloading $url ==" >&2
   if ! curl -fsSL "$url" -o "$tarball"; then
-    echo "Error: template download failed ($url). Check CLAUDE_SCAFFOLD_REPO/CLAUDE_SCAFFOLD_REF." >&2
+    echo "Error: template download failed ($url). Check AGENTS_SCAFFOLD_REPO/AGENTS_SCAFFOLD_REF." >&2
     exit 1
   fi
   tar -xzf "$tarball" -C "$REMOTE_TMPDIR"
@@ -135,7 +135,7 @@ substitute_placeholders() {
 
 # --- 이슈 #13: --update 모드. 이미 부트스트랩된 프로젝트의 베이스 파일을 최신화한다.
 run_update() {
-  echo "== claude-scaffold --update: target=$TARGET name=$NAME ==" >&2
+  echo "== agents-scaffold --update: target=$TARGET name=$NAME ==" >&2
   echo "note: --lang is out of scope for --update; only the Korean base is refreshed" >&2
 
   local hook_rel=".claude/hooks/pre-commit.sh"
@@ -247,7 +247,7 @@ if [ -z "$STACKS" ] && [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then
   read -r STACKS || STACKS=""
 fi
 
-echo "== claude-scaffold: target=$TARGET name=$NAME forge=$FORGE stacks=[${STACKS:-none}] lang=$LANG_OPT inplace=$INPLACE ==" >&2
+echo "== agents-scaffold: target=$TARGET name=$NAME forge=$FORGE stacks=[${STACKS:-none}] lang=$LANG_OPT inplace=$INPLACE ==" >&2
 
 # 1) 베이스 복사 (in-place 면 이미 있으므로 스킵)
 # git 소스면 tracked 파일만 복사(#39) — cp -R 은 untracked 로컬 산출물

@@ -14,7 +14,7 @@ assignees: ''
 
 ```bash
 # the exact command(s) you ran, e.g.
-# bin/claude-scaffold.sh my-app --stack nextjs --yes
+# bin/agents-scaffold.sh my-app --stack nextjs --yes
 ```
 
 ## Environment
