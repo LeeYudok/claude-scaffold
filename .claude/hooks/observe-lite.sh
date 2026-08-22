@@ -37,6 +37,11 @@ if tool == "Bash":
 else:
     summary = str(ti.get("file_path", ti.get("pattern", "")))[:200]
 
+# URL 인라인 자격증명 — postgres://user:pw@host 형태. 아래 key=value 정규식은 키 이름이
+# 앞에 없는 이 형태를 잡지 못하므로 먼저 지운다. 수량자는 아래와 같이 상한을 둔다.
+summary = re.sub(r"([a-zA-Z][a-zA-Z0-9+.\-]{1,15}://)[^:/@\s]{1,64}:[^@/\s]{1,128}@",
+                 r"\1[REDACTED]@", summary)
+
 # 시크릿 마스킹 (bounded, 재앙적 백트래킹 방지)
 summary = re.sub(
     r"(?i)(api[_-]?key|token|secret|password|authorization|auth)"
