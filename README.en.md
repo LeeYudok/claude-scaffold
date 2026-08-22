@@ -5,9 +5,10 @@
 [![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Not a framework — a minimal, fork-and-fill bootstrap for Claude Code** with
+**Not a framework — a minimal, fork-and-fill bootstrap for AI coding agents** with
 **enforced** rule tiers: P0 (halt) / P1 (PR-block) / P2 (review). Stack presets
-compose into a single pre-commit gate.
+compose into a single pre-commit gate. Claude Code first; Codex and other
+AGENTS.md harnesses are supported via [`--harness`](#harness---harness).
 
 ![Demo: one-command bootstrap, the generated .claude/ tree, and the pre-commit gate blocking a staged .env](docs/assets/demo.gif)
 
@@ -167,6 +168,8 @@ files stay forge-neutral ("issue / PR·MR").
 | `all` | Mixed teams | Full install + the git hook (Claude Code enforces via PreToolUse; every other harness hits the same gate through the git hook) |
 
 Codex reads `AGENTS.md` natively, so the rules layer works as-is. An existing `.git/hooks/pre-commit` is never overwritten — you get a warning instead.
+
+**Verified (2026-08)**: Codex (codex-cli 0.149.0) auto-loads the `codex`-mode AGENTS.md, answered the rule tiers correctly, and **refused an instruction to commit a `.env` citing the P0 rule** (first line of defense). If a model does try anyway, the git hook blocks it with exit 2 (second line, test-covered). Antigravity (agy 1.1.17) documents `AGENTS.md`/`.agents/rules/` support, but **headless (`-p`) mode measurably does not load rules** — interactive mode is unverified, so Antigravity support is not guaranteed.
 
 ## Language (`--lang`)
 

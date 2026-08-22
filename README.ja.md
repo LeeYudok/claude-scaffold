@@ -5,9 +5,10 @@
 [![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**フレームワークではありません — Claude Code のためのミニマルな fork-and-fill ブートストラップです**。
+**フレームワークではありません — AI コーディングエージェントのためのミニマルな fork-and-fill ブートストラップです**。
 ルール階層を**強制**します: P0(即時停止) / P1(PRブロック) / P2(レビュー指摘)。スタックプリセットは
-単一の pre-commit ゲートに合成されます。
+単一の pre-commit ゲートに合成されます。Claude Code を第一に、Codex など AGENTS.md
+ハーネスは [`--harness`](#ハーネス---harness) で対応します。
 
 ![デモ: ワンコマンドのブートストラップ、生成された .claude/ ツリー、ステージングされた .env をブロックする pre-commit ゲート](docs/assets/demo.gif)
 
@@ -167,6 +168,8 @@ tests/                    ブートストラップスクリプト用 bats リグ
 | `all` | 混在チーム | フルインストール + git フック（Claude Code は PreToolUse、他ハーネスは git フック経由で同じゲートを通る） |
 
 Codex は `AGENTS.md` をネイティブに読むため、ルール層はそのまま機能します。既存の `.git/hooks/pre-commit` は上書きせず、警告のみ出します。
+
+**実測検証（2026-08）**：Codex（codex-cli 0.149.0）は `codex` モード成果物の AGENTS.md を自動で読み込み、ルール階層を正しく回答し、`.env` をコミットせよという指示を **P0 ルールを根拠に自ら拒否**しました（第一の防衛線）。モデルが強行しても git フックが exit 2 でブロックします（第二の防衛線、テスト済み）。Antigravity（agy 1.1.17）はドキュメント上 `AGENTS.md`/`.agents/rules/` をサポートすると記載していますが、**headless（`-p`）モードではルールを読み込まないことを実測** — インタラクティブモードは未検証のため、Antigravity 対応は保証しません。
 
 ## 言語 (`--lang`)
 
