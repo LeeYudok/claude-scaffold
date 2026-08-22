@@ -164,10 +164,19 @@ files stay forge-neutral ("issue / PR·MR").
 | Value | Target | What it does |
 |---|---|---|
 | `claude` (default) | Claude Code | Full install — settings.json hook bindings, subagents, slash commands, workflows |
-| `codex` | Codex and other AGENTS.md harnesses | Installs only the harness-neutral layers (AGENTS.md, rules, skills, hooks, memory), drops the Claude-only layers, and wires the pre-commit gate as a **real `.git/hooks/pre-commit`** |
-| `all` | Mixed teams | Full install + the git hook (Claude Code enforces via PreToolUse; every other harness hits the same gate through the git hook) |
+| `codex` | Codex and other AGENTS.md harnesses | Installs only the harness-neutral layers (AGENTS.md, rules, skills, hooks, memory) and drops the Claude-only layers |
+| `all` | Mixed teams | Full install |
 
-Codex reads `AGENTS.md` natively, so the rules layer works as-is. An existing `.git/hooks/pre-commit` is never overwritten — you get a warning instead.
+**Support comes in two tiers (#21)** — not a binary "supported / unsupported".
+
+| Tier | What holds | Which harnesses |
+|---|---|---|
+| **baseline** | The P0/P1 tiers in the `AGENTS.md` body (including the selected stack's P0) + a **real `.git/hooks/pre-commit` gate** + CI | **Every harness, whatever `--harness` you passed.** It holds no matter what the harness reads, and it holds when a human commits straight from the terminal |
+| **full** | baseline + that harness's native layers (subagents, skills, slash commands, path-scoped rule loading, lifecycle hooks) | Only harnesses whose adapter has been measured |
+
+The git hook is **always wired, regardless of harness** (#21). Claude Code's `PreToolUse` hook only fires when that session commits through the Bash tool, so it is an early-feedback layer, not the enforcement line — the deterministic line lives outside the harness (`.git/hooks` + CI). An existing `.git/hooks/pre-commit` is never overwritten; you get a warning instead.
+
+The selected stack's P0 rules are **inlined into the `AGENTS.md` body**, so they do not depend on a `.claude/rules/` reference link and stay reachable on harnesses that never load `.claude/`. Stacks you did not select are not inlined (Codex caps combined instructions at 32KiB by default — this avoids context flooding).
 
 **Verified (2026-08)**: Codex (codex-cli 0.149.0) auto-loads the `codex`-mode AGENTS.md, answered the rule tiers correctly, and **refused an instruction to commit a `.env` citing the P0 rule** (first line of defense). If a model does try anyway, the git hook blocks it with exit 2 (second line, test-covered). Antigravity (agy 1.1.17) documents `AGENTS.md`/`.agents/rules/` support, but **headless (`-p`) mode measurably does not load rules** — interactive mode is unverified, so Antigravity support is not guaranteed.
 

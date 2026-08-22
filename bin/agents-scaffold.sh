@@ -381,6 +381,35 @@ if [ "$LANG_OPT" = "en" ]; then
   fi
 fi
 
+# 2d) 스택별 P0 를 AGENTS.md 본문에 인라인 (#21)
+#   AGENTS.md 는 모든 하네스가 읽는 유일한 상시 로드 면이다. 스택 P0 를
+#   `.claude/rules/<stack>.md` 참조로만 두면 .claude/ 를 로드하지 않는 하네스에서
+#   해당 P0 가 도달 불가가 된다 → 선택한 스택의 P0 만 본문에 삽입한다.
+#   전 스택을 인라인하지 않는 이유: Codex 의 instruction 합산 기본 한도는 32KiB
+#   (project_doc_max_bytes) 이고 상시 로드 면을 무제한 키우면 context flooding 이 된다.
+#   lang 오버레이가 AGENTS.md 를 통째로 덮어쓰므로 반드시 그 뒤에 실행한다.
+agents_md="$TARGET/AGENTS.md"
+p0_marker='<!-- STACK P0 -->'
+if [ -f "$agents_md" ] && grep -qF "$p0_marker" "$agents_md"; then
+  for s in "${STACK_ARR[@]:-}"; do
+    s="$(echo "$s" | tr -d '[:space:]')"
+    [ -z "$s" ] && continue
+    partial="$SRC/presets/$s/AGENTS.partial.md"
+    if [ "$LANG_OPT" = "en" ] && [ -f "$SRC/presets/lang-en/stacks/$s/AGENTS.partial.md" ]; then
+      partial="$SRC/presets/lang-en/stacks/$s/AGENTS.partial.md"
+    fi
+    [ -f "$partial" ] || { echo "Warning: $partial not found — stack P0 not inlined for '$s'" >&2; continue; }
+    tmp="$(mktemp)"
+    awk -v partial="$partial" -v marker="$p0_marker" '
+      { print }
+      index($0, marker) && !ins {
+        while ((getline line < partial) > 0) print line
+        close(partial); ins = 1
+      }
+    ' "$agents_md" > "$tmp" && mv "$tmp" "$agents_md"
+  done
+fi
+
 # 3) 플레이스홀더 치환
 find "$TARGET/.claude" "$TARGET/AGENTS.md" "$TARGET/CLAUDE.md" "$TARGET/GEMINI.md" -type f 2>/dev/null | while IFS= read -r f; do
   substitute_placeholders "$f"
@@ -392,14 +421,17 @@ chmod +x "$TARGET/.claude/hooks/"*.sh 2>/dev/null || true
 # 4.5) 하네스 조정 (#16)
 #   codex: Claude Code 전용 계층 제거 — AGENTS.md 는 Codex 가 네이티브로 읽고,
 #          rules/skills/hooks/memory 는 하네스 중립 문서·스크립트라 유지한다.
-#   codex|all: pre-commit 게이트를 진짜 git hook 으로도 배선 — Claude Code 의
-#          PreToolUse 바인딩(settings.json)이 없는 하네스에서도 강제가 성립.
+#   전 하네스 공통: pre-commit 게이트를 진짜 git hook 으로 배선 (#21).
 if [ "$HARNESS" = "codex" ]; then
   echo "== harness=codex: removing Claude Code-only layers ==" >&2
   rm -rf "$TARGET/.claude/agents" "$TARGET/.claude/commands" "$TARGET/.claude/workflows"
   rm -f "$TARGET/.claude/settings.json" "$TARGET/CLAUDE.md" "$TARGET/GEMINI.md"
 fi
-if [ "$HARNESS" = "codex" ] || [ "$HARNESS" = "all" ]; then
+# git hook 은 하네스와 무관하게 항상 배선한다 (#21).
+#   Claude Code 의 PreToolUse 훅(settings.json)은 그 세션이 Bash 툴로 커밋할 때만 발동하므로,
+#   사람이 터미널에서 직접 커밋하거나 다른 하네스가 커밋하면 게이트를 타지 않는다.
+#   결정적 강제선은 하네스 밖(.git/hooks + CI)에 두고, 하네스 훅은 조기 피드백 계층으로 남긴다.
+if true; then
   if [ -d "$TARGET/.git" ]; then
     githook="$TARGET/.git/hooks/pre-commit"
     if [ -e "$githook" ]; then

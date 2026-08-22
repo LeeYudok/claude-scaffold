@@ -3,7 +3,9 @@
 This file is the **single source of truth (SSOT)** that AI agents (Claude Code, Gemini CLI, Codex, etc.)
 follow when working in this repository. It is the project brain. `CLAUDE.md`/`GEMINI.md` reference this file.
 
-@.claude/memory/MEMORY.md
+This file must be **self-contained** — the P0/P1 tiers below are readable here without loading any
+other file. `@` imports are Claude Code-specific syntax, so they are kept out of this
+harness-neutral file (`CLAUDE.md`/`GEMINI.md` own the memory-index import).
 
 ## Memory path override
 
@@ -59,7 +61,14 @@ Stop work immediately and escalate to the user on a P0 violation.
 - **Data**: get explicit user consent before `DELETE/DROP/TRUNCATE` in a production DB
 - **git**: confirm before `force push` / `reset --hard`. Never stage `.env`
 - **Auth**: never add a new unauthenticated API endpoint
-- **Stack-specific P0**: see the `## P0` section of each `.claude/rules/<stack>.md`
+
+#### Stack-specific P0
+
+The P0 rules of the stack you selected are **inlined below** at bootstrap time. They do not depend
+on a reference link, so they stay reachable on harnesses that never load `.claude/`. Full
+conventions live in `.claude/rules/<stack>.md`.
+
+<!-- STACK P0 -->
 
 ### P1 — Required (within AI's autonomous execution scope; blocks PR on violation)
 
