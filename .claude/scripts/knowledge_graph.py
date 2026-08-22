@@ -36,6 +36,7 @@ ROOT_DOCS = [("AGENTS.md", "root"), ("CLAUDE.md", "root")]
 MD_LINK = re.compile(r"\[([^\]]*)\]\(([^)\s]+)\)")
 WIKI_LINK = re.compile(r"\[\[([a-z0-9-]+)\]\]")
 ISSUE_REF = re.compile(r"#(\d{2,4})\b")
+PERSONAL_MEMORY = re.compile(r"^user_.*\.md$")  # gitignored per-developer memory
 FRONT_NAME = re.compile(r"^name:\s*(\S+)", re.M)
 FRONT_DESC = re.compile(r"^description:\s*(.+)$", re.M)
 
@@ -120,6 +121,10 @@ def build_graph():
                 edges.append({"from": path, "to": resolved, "kind": "link"})
             elif os.path.exists(os.path.join(REPO, resolved)):
                 continue  # a real file outside the graph (code etc.) — skip, no node
+            elif PERSONAL_MEMORY.match(os.path.basename(resolved)):
+                # user_*.md is gitignored per-developer memory (see .claude/.gitignore).
+                # MEMORY.md links to it legitimately; its absence is by design, not breakage.
+                continue
             else:
                 broken.append({"from": path, "target": target})
 

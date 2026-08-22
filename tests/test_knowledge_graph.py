@@ -72,6 +72,21 @@ class TestLinks(FixtureCase):
         self.assertEqual(broken, [])
         self.assertEqual([e for e in edges if e["kind"] == "link"], [])
 
+    def test_gitignored_personal_memory_is_not_broken(self):
+        # user_*.md 는 .claude/.gitignore 로 제외되는 개인 메모리다. MEMORY.md 가 링크하는 것이
+        # 정상이고 파일 부재도 설계상 정상이므로 broken 으로 잡히면 안 된다.
+        write(self.repo, ".claude/memory/MEMORY.md", "[내 머신](user_this-machine.md)")
+        nodes, edges, broken = self.graph()
+        self.assertEqual(broken, [])
+        self.assertEqual([e for e in edges if e["kind"] == "link"], [])
+
+    def test_missing_non_personal_memory_is_still_broken(self):
+        # 위 예외가 일반 메모리까지 삼키면 안 된다.
+        write(self.repo, ".claude/memory/MEMORY.md", "[없는 것](project_nope.md)")
+        nodes, edges, broken = self.graph()
+        self.assertEqual(len(broken), 1)
+        self.assertEqual(broken[0]["target"], "project_nope.md")
+
     def test_links_inside_code_fence_and_inline_code_are_ignored(self):
         write(
             self.repo, ".claude/rules/common.md",
