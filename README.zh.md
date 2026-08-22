@@ -156,6 +156,16 @@ tests/                    引导脚本的 bats 回归测试套件
 `.claude/commands/fix-issue.md` 和 `sdlc-cycle.md` 的 forge 变体（覆盖基础版本）。
 基础文件保持 forge 中立（"issue / PR·MR"）。
 
+## Harness（`--harness`）
+
+| 取值 | 目标 | 行为 |
+|---|---|---|
+| `claude`（默认） | Claude Code | 完整安装 — 含 settings.json 钩子绑定、子代理、斜杠命令、workflows |
+| `codex` | Codex 及其他 AGENTS.md harness | 仅安装与 harness 无关的层（AGENTS.md、rules、skills、hooks、memory），移除 Claude 专用层，并把 pre-commit 门禁接入**真正的 `.git/hooks/pre-commit`** |
+| `all` | 混合团队 | 完整安装 + git 钩子（Claude Code 走 PreToolUse，其余 harness 通过 git 钩子经过同一道门禁） |
+
+Codex 原生读取 `AGENTS.md`，规则层可直接生效。已存在的 `.git/hooks/pre-commit` 不会被覆盖，只会给出警告。
+
 ## 语言（`--lang`）
 
 基础目录树（agents、rules、skills、commands、`AGENTS.md`、钩子/settings

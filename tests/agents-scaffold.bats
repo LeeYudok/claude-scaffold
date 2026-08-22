@@ -512,3 +512,55 @@ JSP
   [ "$status" -eq 2 ]
   [[ "$output" == *"스크립틀릿"* ]]
 }
+
+# --- 9) harness (#16) ---
+
+@test "harness codex drops Claude-only layers, keeps neutral ones, wires git hook" {
+  t="$BATS_TEST_TMPDIR/codex"
+  mkdir -p "$t"
+  git -C "$t" init -q
+  run bash "$SCRIPT" "$t" --forge github --stack go --harness codex --name codex-app --yes
+  [ "$status" -eq 0 ]
+  # kept: harness-neutral layers
+  [ -f "$t/AGENTS.md" ]
+  [ -f "$t/.claude/rules/go.md" ]
+  [ -d "$t/.claude/skills" ]
+  [ -f "$t/.claude/hooks/pre-commit.sh" ]
+  # dropped: Claude Code-only layers
+  [ ! -e "$t/.claude/settings.json" ]
+  [ ! -d "$t/.claude/agents" ]
+  [ ! -d "$t/.claude/commands" ]
+  [ ! -d "$t/.claude/workflows" ]
+  [ ! -e "$t/CLAUDE.md" ]
+  [ ! -e "$t/GEMINI.md" ]
+  # git hook wired and executable, chains the gate
+  [ -x "$t/.git/hooks/pre-commit" ]
+  grep -q 'pre-commit.sh' "$t/.git/hooks/pre-commit"
+  # the wired gate actually blocks a staged .env
+  cd "$t"
+  echo 'X=1' > .env
+  git add -f .env
+  run bash .git/hooks/pre-commit
+  [ "$status" -eq 2 ]
+}
+
+@test "harness all keeps everything and wires git hook; default claude does not touch .git/hooks" {
+  t="$BATS_TEST_TMPDIR/allmode"
+  mkdir -p "$t"
+  git -C "$t" init -q
+  run bash "$SCRIPT" "$t" --forge github --harness all --name all-app --yes
+  [ "$status" -eq 0 ]
+  [ -f "$t/.claude/settings.json" ]
+  [ -f "$t/CLAUDE.md" ]
+  [ -x "$t/.git/hooks/pre-commit" ]
+
+  t2="$BATS_TEST_TMPDIR/claudemode"
+  mkdir -p "$t2"
+  git -C "$t2" init -q
+  run bash "$SCRIPT" "$t2" --forge github --name claude-app --yes
+  [ "$status" -eq 0 ]
+  [ ! -e "$t2/.git/hooks/pre-commit" ]
+
+  run bash "$SCRIPT" "$BATS_TEST_TMPDIR" --harness nope --yes
+  [ "$status" -eq 1 ]
+}

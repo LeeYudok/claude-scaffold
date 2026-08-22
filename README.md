@@ -151,6 +151,16 @@ bin/                    agents-scaffold.sh 부트스트랩 스크립트
 
 주입 파일: `.claude/rules/forge.md`(항상 로드) + `.claude/commands/fix-issue.md`·`sdlc-cycle.md`(forge 변형으로 덮어씀). 베이스 파일은 forge 중립("이슈/PR·MR").
 
+## 하네스 (`--harness`)
+
+| 값 | 대상 | 하는 일 |
+|---|---|---|
+| `claude` (기본) | Claude Code | 전체 설치 — settings.json 훅 바인딩·서브에이전트·슬래시 커맨드·workflows 포함 |
+| `codex` | Codex 등 AGENTS.md 하네스 | 하네스 중립 계층(AGENTS.md·rules·skills·hooks·memory)만 설치, Claude 전용 계층 제거, pre-commit 게이트를 **진짜 `.git/hooks/pre-commit`** 으로 배선 |
+| `all` | 혼용 팀 | 전체 설치 + git hook 배선 (Claude Code 는 PreToolUse, 그 외 하네스는 git hook 으로 같은 게이트를 탄다) |
+
+Codex 는 `AGENTS.md` 를 네이티브로 읽으므로 규칙 계층은 그대로 동작한다. 기존 `.git/hooks/pre-commit` 이 있으면 덮어쓰지 않고 경고만 낸다.
+
 ## 언어 (`--lang`)
 
 베이스 트리(agents·rules·skills·commands·`AGENTS.md`·훅/settings 메시지)는 **기본이

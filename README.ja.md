@@ -158,6 +158,16 @@ tests/                    ブートストラップスクリプト用 bats リグ
 `.claude/commands/fix-issue.md` と `sdlc-cycle.md` の forge 別バリアント(ベースを上書き)。
 ベースファイルは forge 非依存のまま("issue / PR·MR")です。
 
+## ハーネス (`--harness`)
+
+| 値 | 対象 | 動作 |
+|---|---|---|
+| `claude`（デフォルト） | Claude Code | フルインストール — settings.json のフックバインディング・サブエージェント・スラッシュコマンド・workflows を含む |
+| `codex` | Codex ほか AGENTS.md 対応ハーネス | ハーネス中立の層（AGENTS.md・rules・skills・hooks・memory）のみ導入し、Claude 専用層を除去。pre-commit ゲートを**実際の `.git/hooks/pre-commit`** に配線 |
+| `all` | 混在チーム | フルインストール + git フック（Claude Code は PreToolUse、他ハーネスは git フック経由で同じゲートを通る） |
+
+Codex は `AGENTS.md` をネイティブに読むため、ルール層はそのまま機能します。既存の `.git/hooks/pre-commit` は上書きせず、警告のみ出します。
+
 ## 言語 (`--lang`)
 
 ベースツリー(エージェント、ルール、スキル、コマンド、`AGENTS.md`、フック/settings の
