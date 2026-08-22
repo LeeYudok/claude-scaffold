@@ -263,4 +263,4 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 ## ライセンス
 
-MIT — [LICENSE](LICENSE) を参照してください。
+MIT — [LICENSE](LICENSE) を参照してください。サードパーティ由来（スキル・ドキュメント）は [CREDITS.md](CREDITS.md) に記載しています。

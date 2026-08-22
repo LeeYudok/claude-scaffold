@@ -245,4 +245,4 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). 서드파티 유래(스킬·문서)는 [CREDITS.md](CREDITS.md) 참조.

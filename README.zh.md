@@ -261,4 +261,4 @@ claude-scaffold/bin/claude-scaffold.sh --update /path/to/existing-repo
 
 ## License
 
-MIT —— 见 [LICENSE](LICENSE)。
+MIT —— 见 [LICENSE](LICENSE)。第三方来源（技能/文档）见 [CREDITS.md](CREDITS.md)。

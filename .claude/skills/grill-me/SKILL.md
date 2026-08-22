@@ -6,6 +6,9 @@ user-invocable: true
 
 # Grill Me — 적대적 요구사항 심문
 
+> [obra/superpowers](https://github.com/obra/superpowers)(MIT) 의 `brainstorming` 스킬에서
+> 영감을 받아 그 opt-in 대체재로 설계한 자체 스킬 — 이후 워크플로(계획 → TDD → 리뷰)는 superpowers 의 프로세스를 따른다.
+
 스펙이 더 이상 바뀌지 않을 때까지 사용자의 아이디어를 심문한 뒤, 단단해진 스펙을
 일반 구현 플로에 넘긴다. 이 스킬을 명시적으로 호출하면 현재 작업에 한해
 `superpowers:brainstorming` 을 대체하며, 이후 단계(계획 → TDD → 리뷰)는 그대로다.
