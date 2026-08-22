@@ -78,6 +78,8 @@ git フックは**ハーネスに関係なく常に配線されます**（#21）
 
 Codex（codex-cli 0.149.0）は `codex` モード成果物の AGENTS.md を自動で読み込み、ルール階層を正しく回答し、`.env` をコミットせよという指示を **P0 ルールを根拠に自ら拒否**しました（第一の防衛線）。モデルが強行しても git フックが exit 2 でブロックします（第二の防衛線、テスト済み）。
 
+サポート状況の単一の真実の源は [`docs/harness-matrix.json`](harness-matrix.json) です。この表はその manifest と突き合わされ、CI では `scripts/check-harness-matrix.py` が検査します — `full` 等級が 90 日以上再実測されていない、あるいは判定に根拠がない場合、**ビルドは失敗します**。再実測は `scripts/spike-codex-contract.sh --dynamic` で行います。
+
 **既知のギャップ — Codex の skills は自動発見されません。** Codex がリポジトリの skills を探す場所は `.agents/skills` ですが、現在の `--harness codex` は `.claude/skills` に残します。ルール層（`AGENTS.md`）は機能しますが skills 層は機能しません — これは full ではなく baseline です。
 
 Codex 側の制約がもう 2 点、設計に効いてきます。

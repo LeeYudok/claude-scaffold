@@ -78,6 +78,8 @@ git 钩子**与 harness 无关，始终接入**（#21）。Claude Code 的 `PreT
 
 Codex（codex-cli 0.149.0）会自动加载 `codex` 模式产物中的 AGENTS.md，正确回答了规则分级，并**依据 P0 规则主动拒绝了提交 `.env` 的指令**（第一道防线）。即使模型执意尝试，git 钩子也会以 exit 2 拦截（第二道防线，已有测试覆盖）。
 
+支持状态的单一真实来源是 [`docs/harness-matrix.json`](harness-matrix.json)。本表会与该 manifest 对照，并由 CI 中的 `scripts/check-harness-matrix.py` 检查 — 若某个 `full` 等级超过 90 天未重新实测，或某项判定缺少证据，**构建将失败**。重新实测请运行 `scripts/spike-codex-contract.sh --dynamic`。
+
 **已知缺口 — Codex 的 skills 不会被自动发现。** Codex 发现仓库 skills 的路径是 `.agents/skills`，而当前 `--harness codex` 仍将其留在 `.claude/skills`。规则层（`AGENTS.md`）可用，skills 层不可用 — 这属于 baseline 而非 full。
 
 另有两项 Codex 约束影响设计：
