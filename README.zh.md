@@ -5,9 +5,10 @@
 [![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**这不是一个框架，而是一套极简的、fork 后按需填充的 Claude Code 引导脚手架**，
+**这不是一个框架，而是一套极简的、fork 后按需填充的 AI 编码代理引导脚手架**，
 自带**强制执行**的规则分级：P0（立即中止）/ P1（阻断 PR）/ P2（评审提示）。各技术栈预设
-会组合进单一的 pre-commit 门禁。
+会组合进单一的 pre-commit 门禁。以 Claude Code 为先，Codex 等 AGENTS.md harness
+通过 [`--harness`](#harness--harness) 支持。
 
 ![演示：一条命令完成引导、生成的 .claude/ 目录树，以及 pre-commit 门禁拦截暂存的 .env](docs/assets/demo.gif)
 
@@ -165,6 +166,8 @@ tests/                    引导脚本的 bats 回归测试套件
 | `all` | 混合团队 | 完整安装 + git 钩子（Claude Code 走 PreToolUse，其余 harness 通过 git 钩子经过同一道门禁） |
 
 Codex 原生读取 `AGENTS.md`，规则层可直接生效。已存在的 `.git/hooks/pre-commit` 不会被覆盖，只会给出警告。
+
+**实测验证（2026-08）**：Codex（codex-cli 0.149.0）会自动加载 `codex` 模式产物中的 AGENTS.md，正确回答了规则分级，并**依据 P0 规则主动拒绝了提交 `.env` 的指令**（第一道防线）。即使模型执意尝试，git 钩子也会以 exit 2 拦截（第二道防线，已有测试覆盖）。Antigravity（agy 1.1.17）虽在文档中声明支持 `AGENTS.md`/`.agents/rules/`，但**实测其 headless（`-p`）模式不加载规则** — 交互模式未验证，因此不保证对 Antigravity 的支持。
 
 ## 语言（`--lang`）
 

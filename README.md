@@ -5,9 +5,10 @@
 [![tests](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/leeyudok/agents-scaffold/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**프레임워크가 아니라 fork-and-fill 미니멀 부트스트랩** — Claude Code 용 `.claude/` 초기
+**프레임워크가 아니라 fork-and-fill 미니멀 부트스트랩** — AI 코딩 에이전트용 `.claude/` 초기
 구성에 **강제되는** 규칙 티어 P0(즉시 중단)/P1(PR 차단)/P2(리뷰 지적)를 얹고, 스택
-프리셋을 pre-commit 게이트 하나로 합성한다.
+프리셋을 pre-commit 게이트 하나로 합성한다. Claude Code 우선이며, Codex 등 AGENTS.md
+하네스는 [`--harness`](#하네스---harness) 로 지원한다.
 
 ![데모: 원커맨드 부트스트랩 → 생성된 .claude/ 트리 → pre-commit 게이트가 .env 커밋을 차단](docs/assets/demo.gif)
 
@@ -160,6 +161,8 @@ bin/                    agents-scaffold.sh 부트스트랩 스크립트
 | `all` | 혼용 팀 | 전체 설치 + git hook 배선 (Claude Code 는 PreToolUse, 그 외 하네스는 git hook 으로 같은 게이트를 탄다) |
 
 Codex 는 `AGENTS.md` 를 네이티브로 읽으므로 규칙 계층은 그대로 동작한다. 기존 `.git/hooks/pre-commit` 이 있으면 덮어쓰지 않고 경고만 낸다.
+
+**실측 검증 (2026-08)**: Codex(codex-cli 0.149.0)는 `codex` 모드 산출물의 AGENTS.md 를 자동 로드해 룰 티어를 정확히 답했고, `.env` 커밋 지시를 **P0 규칙을 근거로 스스로 거부**했다(1차 방어). 모델이 시도하더라도 git hook 이 exit 2 로 차단한다(2차 방어, 테스트 커버). Antigravity(agy 1.1.17)는 내장 문서상 `AGENTS.md`/`.agents/rules/` 를 지원하나 **headless(`-p`) 모드에서 규칙 미로드가 실측**됐다 — 인터랙티브 모드는 미검증이므로 지원을 보장하지 않는다.
 
 ## 언어 (`--lang`)
 
