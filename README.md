@@ -110,6 +110,7 @@ placeholder 를 채우고 안 쓰는 걸 지우면, 결과는 레포의 다른 �
     review/             code-reviewer + security-audit 래퍼
     memory-factcheck/   메모리 사실 검증 — 코드·DB·이슈 대조로 stale 정정
     security-precheck/  감사 대비 보안 사전점검 → 이슈 → 병렬 수정
+    docs-sync/          문서 현행화 — 주장별 사실 대조 + 다국어 짝 파일 동시 갱신
   workflows/            (자동 로드 아님 — 명시 호출로만 실행)
     rules-audit.js      저장형 Workflow 예제 — 스캔/검증/수정, 머지는 사람 게이트
   scripts/              (자동 로드 아님 — 명시 호출로만 실행)

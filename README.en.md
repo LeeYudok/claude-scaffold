@@ -114,6 +114,7 @@ result is plain files under version control like any other code in the repo.
     review/                   code-reviewer + security-audit wrapper
     memory-factcheck/         memory fact-check — verify claims against code/DB/issues, correct stale
     security-precheck/        pre-audit security sweep → issues → parallel fixes
+    docs-sync/                doc currency — claim-by-claim verification + parallel-language sync
   workflows/             (not auto-loaded — invoked explicitly)
     rules-audit.js           stored Workflow example — scan/verify/repair with human merge gate
   scripts/               (not auto-loaded — invoked explicitly)

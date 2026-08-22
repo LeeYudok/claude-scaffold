@@ -18,6 +18,7 @@ move long source texts, tables, and examples into `resources/` files read only w
 
 Included: `example-skill/`, `review/`, `status/`, `search-first/`, `skill-evolve/`,
 `memory-factcheck/` (memory fact-check vs code/DB/issues), `security-precheck/` (pre-audit security sweep),
+`docs-sync/` (doc currency — claim-by-claim verification and parallel-language sync),
 `grill-me/` (adversarial requirements interrogation — opt-in alternative to
 superpowers-style brainstorming; the user picks one per task).
 New skills should use the `{{PROJECT_NAME}}-sk-*` prefix.

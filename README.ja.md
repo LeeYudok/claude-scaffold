@@ -114,6 +114,7 @@ agents-scaffold/bin/agents-scaffold.sh /path/to/new-repo --forge github --stack 
     review/                   code-reviewer + security-audit ラッパー
     memory-factcheck/         メモリのファクトチェック — 主張をコード/DB/イシューと照合し、古いものを修正
     security-precheck/        監査前セキュリティスイープ → イシュー化 → 並列修正
+    docs-sync/                ドキュメント現行化 — 主張ごとの事実照合 + 多言語ペアの同時更新
   workflows/             （自動ロードされない — 明示的に呼び出す）
     rules-audit.js           保存型 Workflow の例 — scan/verify/repair、マージは人間ゲート
   scripts/               （自動ロードされない — 明示的に呼び出す）

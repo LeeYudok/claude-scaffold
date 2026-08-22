@@ -235,6 +235,7 @@ EOF
 
   [ -f "$BATS_TEST_TMPDIR/.claude/skills/memory-factcheck/SKILL.md" ]
   [ -f "$BATS_TEST_TMPDIR/.claude/skills/security-precheck/SKILL.md" ]
+  [ -f "$BATS_TEST_TMPDIR/.claude/skills/docs-sync/SKILL.md" ]
   [ -f "$BATS_TEST_TMPDIR/.claude/workflows/README.md" ]
   [ -f "$BATS_TEST_TMPDIR/.claude/workflows/rules-audit.js" ]
   [ -f "$BATS_TEST_TMPDIR/.claude/scripts/knowledge_graph.py" ]
@@ -251,6 +252,22 @@ EOF
   ! grep -rq '{{PROJECT_NAME}}' "$BATS_TEST_TMPDIR/.claude"
   grep -q 'graphproj' "$BATS_TEST_TMPDIR/.claude/scripts/knowledge_graph.py"
   grep -q 'graphproj' "$BATS_TEST_TMPDIR/.claude/workflows/rules-audit.js"
+}
+
+@test "docs-sync skill ships in both languages (#29)" {
+  t="$BATS_TEST_TMPDIR/dsko"
+  mkdir -p "$t"
+  run bash "$SCRIPT" "$t" --forge github --name ds-ko --yes
+  [ "$status" -eq 0 ]
+  grep -q '^name: docs-sync$' "$t/.claude/skills/docs-sync/SKILL.md"
+  grep -q '다국어' "$t/.claude/skills/docs-sync/SKILL.md"
+
+  t2="$BATS_TEST_TMPDIR/dsen"
+  mkdir -p "$t2"
+  run bash "$SCRIPT" "$t2" --forge github --lang en --name ds-en --yes
+  [ "$status" -eq 0 ]
+  grep -q '^name: docs-sync$' "$t2/.claude/skills/docs-sync/SKILL.md"
+  grep -q 'parallel-language' "$t2/.claude/skills/docs-sync/SKILL.md"
 }
 
 @test "--lang en overlays ported files with real English content" {
